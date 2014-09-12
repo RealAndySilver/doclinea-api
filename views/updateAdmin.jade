@@ -1,0 +1,34 @@
+include head
+#login_container
+	#logo 
+		img(src="../../../images/logo_caracol.png", width="220px", height="200px")
+	#form_container
+		form(method='post',action='/UpdateAdmin', name="form")
+			label(for='name') Nombre usuario:
+			p
+			input(class="input_textfield",type='text',name='name',id='name', value="#{admin.name}")
+			p
+			label(for='email') Correo usuario:
+			p
+			input(class="input_textfield",type='text',name='email',id='email', value="#{admin.email}")
+			p
+			label(for='password') Contraseña:
+			p
+			input(class="input_textfield",type='password',name='password',id='password', value="#{admin.password}")
+			p
+			//select(name="app_id_list")
+			each app, index in apps
+				-if(app._id==admin.app_id_list[0])
+					option(value="#{app._id}", selected="selected") #{app.name}
+				-else
+					option(value="#{app._id}") #{app.name}
+			p
+			input(type='hidden',name='super_admin_id',id='super_admin_id',value='#{super_admin_id}')
+			input(type='hidden',name='admin_id',id='admin_id',value='#{admin._id}')
+			input(class="submit_button",type='submit',name='submit',value='Actualizar')
+			input(class="submit_button",type='button',name='cancel',value='Cancelar')
+			script.
+				var btn = document.forms['form'].elements["cancel"];
+				btn.onclick = function(){
+					window.history.back(-1)
+				};

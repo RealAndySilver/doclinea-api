@@ -1,0 +1,61 @@
+include head
+#main_wrapper
+	.subtitle 
+		h1 Bienvenid@ 
+			span(style="color:#ff0c8a;") #{admin.name}
+			- var super_admin_id = admin._id;
+		a(href="/")
+			.logout(style="float:right; margin-right:20px;") Logout
+		//h2 Tipo de cuenta: #{admin.type}
+	-if(admin.type=="superadmin")
+		.subtitle 
+			h1 Selecciona una opción:
+		#boton 
+			a(href="/AppCreator/#{admin._id}")
+				#button_text App 
+					span(style="color:#ff0c8a; font-size:30px; font-weight:bold;") +
+	p
+	each app, index in apps
+			.appContainer(style="color:#333; font-size:30px; background:url(#{app.logo_square_url});") 
+				.edit_topbar(style="width:100%;")
+					.edit
+						a(href='/AppUpdater/#{admin._id}/#{app._id}')
+							div(style="width:30px; height:30px;")
+					-if(admin.type!="admin")
+						.erase
+							a(href='/DeleteApp/#{app._id}/#{admin._id}', onClick="return confirm('Está seguro que desea borrar #{app.name}? Esta acción borrará todos los items asociados y no habrá manera de regresar.');")
+								div(style="width:30px; height:30px;")
+				.appTextContainer
+					a(href='/AppDashboard/#{app._id}/#{admin._id}/#{app.name}')
+						.app_name #{app.name}
+					-if(admin.type!="admin")
+						a(href='/AdminAssigner/#{app._id}/#{super_admin_id}')
+							.app_name(style="font-size:20px; margin-top:50px;") Asignar Admin 
+								span(style="color:#ff0c8a; font-size:30px; font-weight:bold;")
+					a(href='/AppUpdater/#{admin._id}/#{app._id}')
+						.app_name(style="font-size:20px;") Editar App 
+							span(style="color:#ff0c8a; font-size:20px; font-weight:bold;")
+					-if(admin.type!="admin")
+						a(href='/DeleteApp/#{app._id}/#{admin._id}', onClick="return confirm('Está seguro que desea borrar #{app.name}? Esta acción borrará todos los items asociados y no habrá manera de regresar.');")
+							.app_name(style="font-size:20px;") Borrar App 
+								span(style="color:#ff0c8a; font-size:30px; font-weight:bold;")
+					a(href='/SendPushBroadcast/#{app._id}/#{admin._id}')
+						.app_name(style="font-size:20px;") Enviar Push 
+							span(style="color:#ff0c8a; font-size:30px; font-weight:bold;")
+	.clear_both
+	p
+	-if(admin.type=="superadmin")
+		#boton 
+			a(href="/AdminCreator/#{admin._id}")
+				#button_text Admin 
+					span(style="color:#ff0c8a; font-size:30px; font-weight:bold;") +
+		p
+		each admin, index in admins
+			.adminContainer 
+				.erase(style="")
+					a(href='/DeleteAdmin/#{admin._id}/#{super_admin_id}', onClick="return confirm('Está seguro que desea borrar a #{admin.name}? Esta acción no podrá deshacerse.');")
+						div(style="width:30px; height:30px; text-align:left; font-size:17px; padding-left:5px;") X
+				.adminTextContainer
+					a(href='/AdminUpdater/#{admin._id}/#{super_admin_id}')
+						.app_name
+							|#{admin.name}

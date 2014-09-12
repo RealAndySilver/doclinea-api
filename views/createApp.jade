@@ -1,0 +1,95 @@
+include head
+#login_container
+	#logo 
+		img(src="../images/logo_caracol.png", width="220px", height="200px")
+	#form_container
+		form(method='post',action='/CreateApp', name="form",enctype="multipart/form-data")
+			fieldset(style="width:230px;")
+				legend Información:
+				label(for='name') Nombre del Evento ó Aplicación:
+				p
+				input(class="input_textfield",type='text',name='name',id='name')
+				p
+				label(for='contact_email') Correo de Contacto:
+				p
+				input(class="input_textfield",type='text',name='contact_email',id='contact_email')
+				legend Mensaje para Redes Sociales
+				p
+				textarea(class="input_textarea",rows='5',cols='29',name='social_message')
+			p
+			fieldset(style="width:230px;")
+				legend Media 
+				label(for='image_url') Logo del Evento (Ancho):
+				p
+				input(type="file", id="logo_wide_url", name="logo_wide_url", style="width:230px;")
+				#upload_preview
+				p
+				label(for='thumb_url') Logo del Evento (Cuadrado):
+				p
+				input(type="file", id="logo_square_url", name="logo_square_url", style="width:230px;")
+				#upload_preview
+			p
+			-if(admin.type=="superadmin")
+				fieldset(style="width:230px;")
+					legend Push:
+					label(for='name') Nombre del certificado iOS (no incluir extensión):
+					p
+					input(class="input_textfield",type='text',name='ios_cert',id='ios_cert')
+					p
+					label(for='name') Nombre de la llave (no incluir extensión):
+					p
+					input(class="input_textfield",type='text',name='ios_cert_key',id='ios_cert_key')
+					p
+					label(for='name') Google Api Key:
+					p
+					input(class="input_textfield",type='text',name='gcm_apikey',id='gcm_apikey')
+					p
+					input(type="checkbox", name="is_development", id="is_development", value="true", checked)
+					label(for="ios") Modo desarrollo
+				p
+			fieldset(style="width:230px;")
+				legend Redes Sociales:
+				p
+				label(for='facebook_tag') Hashtag Facebook (incluir #):
+				p
+				input(class="input_textfield",type='text',name='facebook_tag',id='facebook_tag')
+				p
+				label(for='facebook_url') URL Facebook
+				p
+				input(class="input_textfield",type='text',name='facebook_url',id='facebook_url')
+				p
+				input(type="checkbox", name="facebook_tag_is_active", id="facebook_tag_is_active", value="true")
+				label(for="facebook_tag_is_active") Activo
+				p
+				label(for='instagram_tag') Hashtag Instagram (incluir #):
+				p
+				input(class="input_textfield",type='text',name='instagram_tag',id='instagram_tag')
+				p
+				label(for='instagram_url') URL Instagram
+				p
+				input(class="input_textfield",type='text',name='instagram_url',id='instagram_url')
+				p
+				input(type="checkbox", name="instagram_tag_is_active", id="instagram_tag_is_active", value="true")
+				label(for="instagram_tag_is_active") Activo
+				p
+				label(for='twitter_tag') Hashtag Twitter (incluir #):
+				p
+				input(class="input_textfield",type='text',name='twitter_tag',id='twitter_tag')
+				p
+				label(for='twitter_url') URL Twitter
+				p
+				input(class="input_textfield",type='text',name='twitter_url',id='twitter_url')
+				p
+				input(type="checkbox", name="twitter_tag_is_active", id="twitter_tag_is_active", value="true")
+				label(for="twitter_tag_is_active") Activo
+				p
+			p
+			input(type='hidden',name='admin_id',id='admin_id',value='#{admin_id}')
+			input(class="submit_button",type='submit',name='submit',value='Crear')
+			input(class="submit_button",type='button',name='cancel',value='Cancelar')
+
+			script.
+				var btn = document.forms['form'].elements["cancel"];
+				btn.onclick = function(){
+					window.history.back(-1);
+				};

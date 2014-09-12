@@ -1,0 +1,33 @@
+include head
+#main_wrapper
+	.subtitle 
+		h1 Asignar admins para: 
+			span(style="color:#ff0c8a; font-size:100px;") #{app.name}
+	p
+	form(method='post',action='/AssignAdmin', name="form")
+		each admin, index in admins
+			.adminContainer 
+				.adminTextContainer
+					.app_name
+						-if(admin.app_id_list.indexOf(app._id)>=0)
+							input(type="checkbox", name="admin_ids", id="admin_ids_#{index}", value="#{admin._id}", checked)
+							br
+							label(for="admin_ids_#{index}") #{admin.name}
+						-else
+							input(type="checkbox", name="admin_ids", id="admin_ids_#{index}", value="#{admin._id}")
+							br
+							label(for="admin_ids_#{index}") #{admin.name}
+					script.
+						console.log("appid "+"#{admin.app_id_list}"+ " app_id: "+"#{app._id} index:" + "#{admin.app_id_list.indexOf(app._id)}");
+					input(type='hidden',name='all_admins_list',value='#{admin._id}')
+					p
+		div(style="clear:both;")
+		input(type='hidden',name='app_id',value='#{app._id}')
+		input(type='hidden',name='super_admin_id',value='#{super_admin_id}')
+		input(class="submit_button",type='submit',name='submit',value='Asignar')
+		input(class="submit_button",type='button',name='cancel',value='Cancelar')
+		script.
+				var btn = document.forms['form'].elements["cancel"];
+				btn.onclick = function(){
+					window.history.back(-1);
+				};

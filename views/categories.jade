@@ -1,0 +1,38 @@
+
+label(for='category_id') Asignar una Categoría:
+select(name="category_id")
+	option(value="") Ninguna
+	each category, index in categories
+		-if(atom.category_id==category._id)
+			option(value="#{category._id}", selected="selected") #{category.name}
+		-else
+			option(value="#{category._id}") #{category.name}
+p
+
+each categoryfather, index in categoryfathers
+	fieldset(style="width:230px;")
+		legend #{categoryfather.name}
+		select(name="category", style="width:190px;")
+			option(value='{"categoryfather_id":"0", "categoryfather_name":"Ninguno", "categoryson_name":"Ninguno", "categoryson_id":"0"}') Ninguno
+			each categoryson, index2 in categorysons
+				-if(categoryfather._id==categoryson.categoryfather_id)
+					-if(atom.category_list.length>0)
+						each category_item, index3 in atom.category_list
+							-if(category_item.categoryfather_id==categoryfather._id)
+								-if(category_item.categoryson_id==categoryson._id)
+									option(value='{"categoryfather_id":"#{categoryfather._id}", "categoryfather_name":"#{categoryfather.name}", "categoryson_name":"#{categoryson.name}", "categoryson_id":"#{categoryson._id}"}', selected="selected") #{categoryson.name}
+									script.
+										console.log("listo en el primer if y checked #{categoryson.name}");
+								-else
+									option(value='{"categoryfather_id":"#{categoryfather._id}", "categoryfather_name":"#{categoryfather.name}", "categoryson_name":"#{categoryson.name}", "categoryson_id":"#{categoryson._id}"}') #{categoryson.name}
+									script.
+										console.log("listo en el primer else #{categoryson.name}");
+							
+							-else if(category_item.categoryson_id=="0" || !category_item.categoryson_id)
+								option(value='{"categoryfather_id":"#{categoryfather._id}", "categoryfather_name":"#{categoryfather.name}", "categoryson_name":"#{categoryson.name}", "categoryson_id":"#{categoryson._id}"}') #{categoryson.name}
+								script.
+									console.log("listo es 0 #{categoryson.name}");
+					-else
+						option(value='{"categoryfather_id":"#{categoryfather._id}", "categoryfather_name":"#{categoryfather.name}", "categoryson_name":"#{categoryson.name}", "categoryson_id":"#{categoryson._id}"}') #{categoryson.name}
+						script.
+							console.log("no tiene atom_list")

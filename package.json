@@ -1,0 +1,24 @@
+{
+  "name": "DocLinea",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "nodemon doclinea.js"
+  },
+  "dependencies": {
+    "express": "3.3.3",
+    "jade": "*",
+    "less-middleware": "*",
+    "mongoose": "3.6.14",
+    "nodemailer": "*",
+    "apn": "1.4.1",
+    "stylus": "*",
+    "knox": "*",
+    "node-gcm": "*"
+  },
+  "devDependencies": {},
+  "subdomain": "iccknet-EventosCaracol",
+  "engines": {
+    "node": "0.10.x"
+  }
+}

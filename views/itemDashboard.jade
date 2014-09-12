@@ -1,0 +1,63 @@
+include head
+#main_wrapper
+	a(href="/Dashboard/#{admin._id}")
+		#back Admin Home
+	a(href="/AppDashboard/#{app._id}/#{admin._id}/#{app.name}")
+		#back Back
+
+	.subtitle 
+		h1(style="text-align:center;") #{menuItem.name}	
+	#mid_container
+		a(href="/ItemCreator/#{app._id}/#{admin._id}/#{menuItem._id}")
+			#plus_sign +
+	p
+	-if(atoms.length>0)
+		h1(style="color:#ff0c8a;margin:0 auto;width:200px;text-align:center;") 
+			span(style="color:white; font-size:100px;") #{atoms.length}
+			|Item(s) Creados
+		div(style="font-style:italic; width:350px; margin:0 auto; font-size:12px; text-align:center;") *Los items Especiales aparecerán en color 
+			span(style="color:#ff0cb2;") fucsia.
+		div(style="font-style:italic; width:350px; margin:0 auto; font-size:12px; text-align:center;") *Los items Destacados aparecerán en color 
+			span(style="color:#0d9aff;") azul.
+	-else
+		h1(style="color:#ff0c8a;margin:0 auto;width:200px;text-align:center;") No hay Items
+	#menu_container
+		each atom, index in atoms
+			-if(atom.feature_type=="especial")
+				.menu_container(style="background:#ff0cb2; color:white; height:120px;")
+					.edit_topbar
+						.priority
+							|#{atom.priority}
+						.erase
+							a(href='/DeleteItem/#{app._id}/#{admin._id}/#{atom._id}/#{menuItem._id}', onClick="return confirm('Está seguro que desea borrar #{atom.name}?');")
+								div(style="width:30px; height:30px;")
+					a(href='/ItemUpdater/#{app._id}/#{admin._id}/#{menuItem._id}/#{atom._id}')
+						.menu_text(style="color:white;")
+							|#{atom.name}
+			-if(atom.feature_type=="destacado")
+				.menu_container(style="background:#0d9aff; color:white; height:120px;")
+					.edit_topbar
+						.priority
+							|#{atom.priority}
+						.erase
+							a(href='/DeleteItem/#{app._id}/#{admin._id}/#{atom._id}/#{menuItem._id}', onClick="return confirm('Está seguro que desea borrar #{atom.name}?');")
+								div(style="width:30px; height:30px;")
+					a(href='/ItemUpdater/#{app._id}/#{admin._id}/#{menuItem._id}/#{atom._id}')
+						.menu_text(style="color:white;")
+							|#{atom.name}
+			-if(atom.feature_type=="normal")
+				.menu_container(style="height:120px;")
+					.edit_topbar
+						.priority
+							|#{atom.priority}
+						.erase
+							a(href='/DeleteItem/#{app._id}/#{admin._id}/#{atom._id}/#{menuItem._id}', onClick="return confirm('Está seguro que desea borrar #{atom.name}?');")
+								div(style="width:30px; height:30px;")
+					a(href='/ItemUpdater/#{app._id}/#{admin._id}/#{menuItem._id}/#{atom._id}')
+						.menu_text
+							|#{atom.name}
+	script.
+		var btn = document.getElementById('back').innerHTML;
+		btn.onclick = function(){
+			window.history.back(-1);
+		};

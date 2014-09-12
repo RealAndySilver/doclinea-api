@@ -1,0 +1,104 @@
+doctype 5
+html(lang="es")
+	head
+		meta(name="viewport", content="width=device-width, initial-scale=0.5, maximum-scale=5.0, user-scalable=yes")
+		title #{title}
+		link(rel='stylesheet', href='../../../../../stylesheets/style2.css')
+	//body(style="background:rgb(199,88,106);")
+	body(style="background:#333;background:rgb(199,88,106); background-image: url('../../../../images/img.jpg');")
+		div(style="margin:10px auto; width:620px; height:700px;")
+			//div(style="background: rgba(0,0,0,0.15); padding:0 0 30px 30px;")
+			//	span(style="font-size:50px; color:rgba(150,250,190,0.9); font-weight:bold;") Me @ Santa Barbara
+			//	br
+			//	span(id="final", style="font-size:50px; color:white; font-weight:bold;") 
+			//	br
+			//	span(style="font-size:14px; color:rgb(179,224,221); font-weight:0; font-style: italic;")  #{messages.message1}
+			//	br
+			
+			div(style="background: rgba(0,0,0,0.1); padding:0 0 30px 30px;")
+				span(style="font-size:50px; color:rgb(219,229,130); color:#853F8D;") You @ Bogotá
+				br
+				span(id="final2", style="font-size:50px; color:white;") 
+				br
+				span(style="font-size:14px; color:rgb(179,224,221);font-style: italic;")  #{messages.message2}
+				br
+			
+			div(style="background: rgba(0,0,0,0.08); padding:0 0 30px 30px;")
+				span(style="font-size:50px; color:rgb(219,229,130);") Both of us @ Chicago
+				br
+				span(id="final3", style="font-size:50px; color:white;") 
+				br
+				span(style="font-size:14px; color:rgb(179,224,221);font-style: italic;")  #{messages.message3}
+				br
+			div(style="background: rgba(0,0,0,0.06); padding:0 0 30px 30px;")
+				span(style="font-size:30px; color:rgba(150,250,190,0.9);") Our wedding (estimated)
+				br
+				span(id="final4", style="font-size:50px; color:white; font-weight:bold;") 
+				br
+				span(style="font-size:14px; color:rgb(179,224,221); font-weight:0; font-style: italic;")  #{messages.message4}
+				br
+			div(style="background: rgba(100,0,0,0.04); padding:0 0 30px 30px;")
+				span(style="font-size:30px; color:white;") Why all this colors in the timers? 
+				br
+				span(style="font-size:20px; color:rgb(179,224,221);") Because my life is so colorful since you're part of it. 
+				br
+				br
+				span(style="font-size:15px; color:#853F8D;") And never... never forget, how much I love you Amor.
+				br
+				br
+				br
+				span(style="font-size:150px; color:#440000; font-weight:bold;")
+			
+			//script(type="text/javascript", src="/javascripts/form.js")
+		
+		script(type='text/javascript').
+			function start_timer(seconds,div_id){
+				
+				var seconds=seconds;
+				var counter=setInterval(timer, 1000);
+				
+				function span(color,size,text){
+					return '<span style="font-size:'+size+'; color:'+color+';">'+text+'</span>';
+				}
+				
+				function timer(){
+					seconds=seconds-1;
+					var sec_num = parseInt(seconds, 10); 
+					var final_days = Math.floor(sec_num / (60*60*24));
+					var final_hours   = Math.floor(sec_num / 3600);
+					var final_minutes = Math.floor((sec_num - (final_hours * 3600)) / 60);
+					var final_seconds = sec_num - (final_hours * 3600) - (final_minutes * 60);
+					final_hours = final_hours%24;
+					
+					if (final_days   < 10){
+						final_days   = "0"+final_days;
+					}
+					if (final_hours   < 10){
+						final_hours   = "0"+final_hours;
+					}
+					if (final_minutes < 10){
+						final_minutes = "0"+final_minutes;
+					}
+					if (final_seconds < 10){
+						final_seconds = "0"+final_seconds;
+					}
+					var time    = final_days
+								+span('rgba(255,0,0,0.5)','18px',' Days ')
+								+final_hours
+								+span('rgb(212,177,91)','18px',' Hours ')
+								+final_minutes
+								+span('rgb(179,224,221)','18px',' Minutes ')
+								+final_seconds
+								+span('rgb(219,229,130)','18px',' Seconds');
+					
+					if (seconds <= 0){
+						clearInterval(counter);
+						return;
+					}
+					document.getElementById(div_id).innerHTML=time;
+				}
+			}
+			start_timer('#{first_day}','final');
+			start_timer('#{second_day}','final2');
+			start_timer('#{third_day}','final3');
+			start_timer('#{fourth_day}','final4');

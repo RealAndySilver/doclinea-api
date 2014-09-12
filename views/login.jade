@@ -1,0 +1,13 @@
+include head
+#login_container
+	#logo 
+		img(src="images/logo_caracol.png", width="220px", height="200px")
+	#form_container
+			form(method='post', action='/Login')
+				//label User 
+				input(class="input_textfield", type='text',name='email', placeholder="e-mail")
+				//label Password 
+				p
+				input(class="input_textfield", type='password', name='password', placeholder="Password")
+				p
+				input(class="submit_button", type='submit', name='submit', value="login")

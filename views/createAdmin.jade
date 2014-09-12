@@ -1,0 +1,31 @@
+include head
+#login_container
+	#logo 
+		img(src="../images/logo_caracol.png", width="220px", height="200px")
+	#form_container
+		form(method='post',action='/CreateAdmin', name="form")
+			label(for='name') Nombre usuario:
+			p
+			input(class="input_textfield",type='text',name='name',id='name')
+			p
+			label(for='email') Correo usuario:
+			p
+			input(class="input_textfield",type='text',name='email',id='email')
+			p
+			label(for='password') Contraseña:
+			p
+			input(class="input_textfield",type='password',name='password',id='password')
+			p
+			//label(for='apps') Asignar una aplicación:
+			//select(name="app_id_list")
+			each app, index in apps
+				option(value="#{app._id}") #{app.name}
+			p
+			input(type='hidden',name='admin_id',id='admin_id',value='#{admin_id}')
+			input(type='submit',name='submit',value='Crear')
+			input(type='button',name='cancel',value='Cancelar')
+			script.
+				var btn = document.forms['form'].elements["cancel"];
+				btn.onclick = function(){
+					window.history.back(-1)
+				};
