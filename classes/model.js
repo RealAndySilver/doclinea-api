@@ -329,7 +329,7 @@ exports.doctorSignUp = function(req,res){
 		lastname : req.body.lastname,
 		email : req.body.email,
 		gender : req.body.gender, //1 m, 2 f
-		patient_gender : req.body.patient_gender, //1 m, 2 f, 3 b
+		patient_gender : req.body.patient_gender, //1 masculino, 2 femenino, 3 ambos
 		date_created : new Date(),
 		phone : req.body.phone,
 		address : req.body.address,
