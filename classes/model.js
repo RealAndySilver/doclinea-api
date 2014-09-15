@@ -57,7 +57,8 @@ var DoctorSchema= new mongoose.Schema({
 	expiration_date : {type: Date, required:false},
 	phone : {type: String, required:false},
 	address : {type: String, required:false},
-	country : {type: String, required:true, unique:false,},
+	city : {type: String, required:false},
+	country : {type: String, required:false, unique:false,},
 	location_list : {type: [Object], required:false},
 	hospital_list : {type: [Object], required:false},
 	insurance_list : {type: [String], required:false},
@@ -334,6 +335,7 @@ exports.doctorSignUp = function(req,res){
 		phone : req.body.phone,
 		address : req.body.address,
 		country : req.body.country,
+		practice_list : req.body.practice,
 	}).save(function(err,doctor){
 		if(err){
 			res.json(err);
