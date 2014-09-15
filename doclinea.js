@@ -76,7 +76,7 @@ app.post('/api_1.0/Doctor/SignUp', model.doctorSignUp);
 app.get('/api_1.0/Doctor/GetDoctorByEmail/:email', model.getDoctorByEmail);
 app.get('/api_1.0/Doctor/GetDoctorByID/:id', model.getDoctorByID);
 app.get('/api_1.0/Doctor/GetAllDoctors', model.getAllDoctors);
-app.get('/api_1.0/Doctor/GetDoctors/:lat/:lon/:insurance_id/:practice', model.getDoctorsByParams);
+app.post('/api_1.0/Doctor/GetDoctorsByParams', model.getDoctorsByParams);
 //Doctor Update APIs
 app.post('/api_1.0/Doctor/UpdateDoctor', model.updateDoctor);
 //Doctor Delete APIs

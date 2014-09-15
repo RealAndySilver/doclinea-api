@@ -59,7 +59,7 @@ var DoctorSchema= new mongoose.Schema({
 	address : {type: String, required:false},
 	city : {type: String, required:false},
 	country : {type: String, required:false, unique:false,},
-	location_list : {type: [Object], required:false},
+	location_list : {type: Array, required:false},
 	hospital_list : {type: [Object], required:false},
 	insurance_list : {type: [String], required:false},
 	education_list : {type: [Object], required:false},
@@ -323,6 +323,11 @@ exports.deleteUser = function(req,res){
 //////////////////////////////////
 //Create
 exports.doctorSignUp = function(req,res){
+console.log("Req: "+JSON.stringify(req.body));
+var location = [];
+location.push({lat: req.body.lat, lon: req.body.lon });
+var practice = [];
+practice.push(req.body.practice);
 	new Doctor({
 		name : req.body.name,
 		status : false,
@@ -335,10 +340,11 @@ exports.doctorSignUp = function(req,res){
 		phone : req.body.phone,
 		address : req.body.address,
 		country : req.body.country,
-		practice_list : req.body.practice,
-		location_list : [{lat: req.body.lat, lon: req.body.lon }],
+		practice_list : practice,
+		location_list : location,
 	}).save(function(err,doctor){
 		if(err){
+		console.log("Err: "+err);
 			res.json(err);
 		}
 		else{
@@ -380,12 +386,9 @@ exports.getAllDoctors = function(req,res){
 	});
 };
 exports.getDoctorsByParams = function(req,res){
-	Doctor.find({
-				lat:req.params.lat, 
-				lon: req.params.lon, 
-				practice_list: req.params.practice, 
-				insurance_list: insurance
-				},
+console.log("Req: "+JSON.stringify(req.body));
+var filtered_body = utils.remove_empty(req.body);
+	Doctor.find(req.body,
 		excludepass,function(err,doctors){
 		if(doctors.length<=0){
 			res.json({status: false, error: "not found"});
