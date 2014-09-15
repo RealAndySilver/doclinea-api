@@ -336,6 +336,7 @@ exports.doctorSignUp = function(req,res){
 		address : req.body.address,
 		country : req.body.country,
 		practice_list : req.body.practice,
+		location_list : [{lat: req.body.lat, lon: req.body.lon }],
 	}).save(function(err,doctor){
 		if(err){
 			res.json(err);
