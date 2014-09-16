@@ -339,6 +339,7 @@ practice.push(req.body.practice);
 		date_created : new Date(),
 		phone : req.body.phone,
 		address : req.body.address,
+		city : req.body.city,
 		country : req.body.country,
 		practice_list : practice,
 		location_list : location,
