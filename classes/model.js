@@ -28,6 +28,7 @@ var UserSchema= new mongoose.Schema({
 	phone : {type: String, required:false},
 	country : {type: String, required:false},
 	city : {type: String, required:false},
+	localidad : {type: String, required:false},
 	address : {type: String, required:false},
 	status : {type: Number, required:false},
 	insurance : {type: String, required:false},
@@ -58,6 +59,7 @@ var DoctorSchema= new mongoose.Schema({
 	phone : {type: String, required:false},
 	address : {type: String, required:false},
 	city : {type: String, required:false},
+	localidad : {type: String, required:false},
 	country : {type: String, required:false, unique:false,},
 	location_list : {type: Array, required:false},
 	hospital_list : {type: [Object], required:false},
@@ -325,7 +327,7 @@ exports.deleteUser = function(req,res){
 exports.doctorSignUp = function(req,res){
 console.log("Req: "+JSON.stringify(req.body));
 var location = [];
-location.push({lat: req.body.lat, lon: req.body.lon });
+location.push({lat: req.body.lat, lon: req.body.lon});
 var practice = [];
 practice.push(req.body.practice);
 	new Doctor({
@@ -340,6 +342,7 @@ practice.push(req.body.practice);
 		phone : req.body.phone,
 		address : req.body.address,
 		city : req.body.city,
+		localidad: req.body.localidad.name,
 		country : req.body.country,
 		practice_list : practice,
 		location_list : location,
@@ -387,8 +390,9 @@ exports.getAllDoctors = function(req,res){
 	});
 };
 exports.getDoctorsByParams = function(req,res){
-console.log("Req: "+JSON.stringify(req.body));
+
 var filtered_body = utils.remove_empty(req.body);
+console.log("Req: "+JSON.stringify(filtered_body));
 	Doctor.find(req.body,
 		excludepass,function(err,doctors){
 		if(doctors.length<=0){
@@ -402,6 +406,10 @@ var filtered_body = utils.remove_empty(req.body);
 //Update
 exports.updateDoctor = function(req,res){
 var filtered_body = utils.remove_empty(req.body);
+if(req.body.localidad){
+	req.body.localidad=req.body.localidad.name;
+}
+console.log("Req: "+JSON.stringify(filtered_body));
 	Doctor.findOneAndUpdate({email:req.body.email},
 	   {$set:filtered_body}, 
 	   	function(err,doctor){
@@ -413,6 +421,19 @@ var filtered_body = utils.remove_empty(req.body);
 	   	}
 	});
 };
+
+exports.authenticateDoctor = function(req,res){
+console.log("Req: "+JSON.stringify(req.body));
+	Doctor.findOne({email:req.body.email, password: req.body.password},excludepass,function(err,doctor){
+		if(!doctor){
+			res.json({status: false, error: "not found"});
+		}
+		else{
+			res.json({status: true, response: user});
+		}
+	});
+};
+
 //Delete
 exports.deleteDoctor = function(req,res){
 	Doctor.remove({email:req.body.email},function(err){
