@@ -426,7 +426,7 @@ exports.authenticateDoctor = function(req,res){
 console.log("Req: "+JSON.stringify(req.body));
 	Doctor.findOne({email:req.body.email, password: req.body.password},excludepass,function(err,doctor){
 		if(!doctor){
-			res.json({status: false, error: "not found"});
+			res.json({status: false, error: "nogit t found"});
 		}
 		else{
 			res.json({status: true, response: user});
