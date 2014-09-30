@@ -252,7 +252,7 @@ console.log("Req: "+JSON.stringify(req.body));
 			res.json(err);
 		}
 		else{
-			res.json({status: true, message: "Usuario creado exitosamente.", object: user});
+			res.json({status: true, message: "Usuario creado exitosamente.", response: user});
 		}
 	});
 };
