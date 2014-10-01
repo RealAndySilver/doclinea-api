@@ -421,7 +421,7 @@ if(req.body.localidad){
 	req.body.localidad=req.body.localidad.name;
 }
 console.log("Req: "+JSON.stringify(filtered_body));
-	Doctor.findOneAndUpdate({email:req.body.email},
+	Doctor.findOneAndUpdate({_id:req.body.id},
 	   {$set:filtered_body}, 
 	   	function(err,doctor){
 	   	if(!doctor){
