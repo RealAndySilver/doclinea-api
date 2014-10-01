@@ -142,11 +142,21 @@ var ReviewSchema= new mongoose.Schema({
 }),
 	Review= mongoose.model('Review',ReviewSchema);
 
-//PRODUCTION AMAZON BUCKET
+var ImageSchema= new mongoose.Schema({
+	name:{type: String, required: false,unique: false,},
+	owner: {type: String, required: false,unique: false,}, //user, doctor, insurance
+	owner_id: {type: String, required: false,unique: false,},
+	type:{type: String, required: false,unique: false,}, //profile, gallery, logo
+	size:{type: Number, required:false, unique:false,},
+	url:{type: String, required: false,unique: false,},
+}),
+	Image= mongoose.model('Image',ImageSchema);
+
+//Development AMAZON BUCKET
 var client = knox.createClient({
-    key: 'AKIAJNHMEXKKOP3TJXLA'
-  , secret: 'UUzFqh+KmgwcpKwZ+0XYJFVOV54k21Y2vkBOhc6pNO'
-  , bucket: 'eventoscaracol-assets'
+    key: 'AKIAJ32JCWGUBJ3BWFVA'
+  , secret: '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'
+  , bucket: 'doclinea'
 });
 
 //////////////////////////////////
@@ -420,6 +430,17 @@ console.log("Req: "+JSON.stringify(filtered_body));
 	   	else{
 		   	res.json({status:true, message:"Usuario actualizado exitosamente."});
 	   	}
+	});
+};
+exports.updateProfilePic = function(req,res){
+	Doctor.findOne({_id:req.body.id},excludepass,function(err,doctor){
+		if(!doctor){
+			res.json({status: false, error: "not found"});
+		}
+		else{
+			uploadImage(req.files.image,doctor,"profile", 'doctor');
+			res.json({status: true, response: 'update in progress, get doctor again to see results'})
+		}
 	});
 };
 
@@ -712,3 +733,65 @@ var ios = req.body.ios ? true:false;
 		}
 	});
 };
+
+
+
+//Functions//
+////////////
+var uploadImage = function(file,object,type,owner){
+	var tmp_path_image_url = file.path;
+    var extension =".jpg";
+    if(file.type=="image/png"){
+    	extension=".png";
+    }
+	var target_path_image_url = './public/images/' + file.size + file.name;    
+    if(file.size>0){
+		fs.renameSync(tmp_path_image_url,target_path_image_url);		
+		fs.stat(target_path_image_url, function(err, stat){
+		  // Be sure to handle `err`.
+			if(err){
+				console.log("error1 "+err);
+			}
+			else{
+				console.log("Objeto: "+object.email);
+				var req = client.put(owner+'/'+object.email+'/'+type+"/"+file.name, {
+					      'Content-Length': stat.size,
+					      'Content-Type': file.type,
+					      'x-amz-acl': 'public-read'
+				});
+				fs.createReadStream(target_path_image_url).pipe(req);
+				req.on('response', function(res){
+					fs.unlink(target_path_image_url, function(){});
+					new Image({
+						name:file.name,
+						url:req.url,
+						owner: owner,
+						owner_id: object._id,
+						type: type,
+						size:file.size,
+					}).save(function(err,image){	
+						if(err){
+						}
+						else{
+							if(owner=="doctor"){
+								if(type=="profile"){
+									Doctor.findOneAndUpdate({_id:object._id},{$set:{profile_pic:image.url}}, function(err,doctor){
+										if(!doctor){
+											return {status: false, error: "Error"};
+										}
+										else{
+											return {status: true, response: {image_url:image.url}};
+										}
+									});
+								}
+							}						
+						}
+					});
+			  });
+			}
+		});
+	}
+    else{
+	    console.log('no hay imagen');
+    }
+}
