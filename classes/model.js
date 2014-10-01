@@ -67,7 +67,7 @@ var DoctorSchema= new mongoose.Schema({
 	education_list : {type: Array, required:false},
 	profesional_membership : {type: Array, required:false},
 	practice_list : {type: Array, required:false},
-	profile_pic : {type: String, required:false},
+	profile_pic : {type: Object, required:false},
 	gallery : {type: Array, required:false},
 	overall_rating : {type: Number, required:false},
 	review_list : {type: Array, required:false},
@@ -367,6 +367,18 @@ practice_list.push(req.body.practice_list);
 		}
 	});
 };
+exports.addPicToGallery = function(req,res){
+	Doctor.findOne({_id:req.body.id},excludepass,function(err,doctor){
+		if(!doctor){
+			res.json({status: false, error: "not found"});
+		}
+		else{
+			uploadImage(req.files.image,doctor,"gallery", 'doctor');
+			res.json({status: true, response: 'update in progress, get doctor again to see results'})
+		}
+	});
+};
+
 //Read One
 exports.getDoctorByEmail = function(req,res){
 	Doctor.findOne({email:req.params.email},excludepass,function(err,doctor){
@@ -457,6 +469,16 @@ console.log("Req: "+JSON.stringify(req.body));
 };
 
 //Delete
+exports.deleteGalleryPic = function(req,res){
+	Doctor.findOneAndUpdate(
+	    {_id: req.body.id},
+	    {$pull: {gallery: {name:req.body.name}}},
+	    {multi: true},
+	    function(err, doctor) {
+	        res.json({res:'borrado', obj:doctor});
+	    }
+	);
+};
 exports.deleteDoctor = function(req,res){
 	Doctor.remove({email:req.body.email},function(err){
 		if(err){
@@ -739,6 +761,12 @@ var ios = req.body.ios ? true:false;
 //Functions//
 ////////////
 var uploadImage = function(file,object,type,owner){
+	if(!file){
+		object.profile_pic = {name:"", image_url: ""};
+		object.save(function(err,doctor){
+		});
+		return;
+	} 
 	var tmp_path_image_url = file.path;
     var extension =".jpg";
     if(file.type=="image/png"){
@@ -775,14 +803,20 @@ var uploadImage = function(file,object,type,owner){
 						else{
 							if(owner=="doctor"){
 								if(type=="profile"){
-									Doctor.findOneAndUpdate({_id:object._id},{$set:{profile_pic:image.url}}, function(err,doctor){
-										if(!doctor){
-											return {status: false, error: "Error"};
-										}
-										else{
+									object.profile_pic = {name:image.name, image_url: image.url, id: image._id};
+									object.save(function(err,doctor){
 											return {status: true, response: {image_url:image.url}};
-										}
 									});
+								}
+								else if(type=="gallery"){
+									Doctor.findOneAndUpdate(
+									    {_id: object._id},
+									    {$push: {gallery: {image_url:image.url, name:file.name}}},
+									    {safe: true, upsert: true},
+									    function(err, doctor) {
+									        console.log("Doctor: "+doctor);
+									    }
+									);
 								}
 							}						
 						}

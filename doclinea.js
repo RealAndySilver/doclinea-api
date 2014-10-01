@@ -28,7 +28,6 @@ app.set('port', process.env.PORT || 1414);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 app.set('view options', { pretty: false });
-app.use(express.favicon(path.join(__dirname + '/public/images/favicon.png')));
 app.use(allowCrossDomain);
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
@@ -72,6 +71,7 @@ app.post('/api_1.0/User/DeleteUser', model.deleteUser);
 ///////////////////////////////////////////////////////////////////
 //Doctor Create APIs
 app.post('/api_1.0/Doctor/SignUp', model.doctorSignUp);
+app.post('/api_1.0/Doctor/AddPicToGallery', model.addPicToGallery);
 //Doctor Read APIs
 app.get('/api_1.0/Doctor/GetDoctorByEmail/:email', model.getDoctorByEmail);
 app.get('/api_1.0/Doctor/GetDoctorByID/:id', model.getDoctorByID);
@@ -82,6 +82,7 @@ app.post('/api_1.0/Doctor/AuthenticateDoctor', model.authenticateDoctor);
 app.post('/api_1.0/Doctor/UpdateDoctor', model.updateDoctor);
 app.post('/api_1.0/Doctor/UpdateProfilePic', model.updateProfilePic);
 //Doctor Delete APIs
+app.post('/api_1.0/Doctor/DeleteGalleryPic', model.deleteGalleryPic);
 app.post('/api_1.0/Doctor/DeleteDoctor', model.deleteDoctor);
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
