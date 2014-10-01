@@ -252,6 +252,7 @@ console.log("Req: "+JSON.stringify(req.body));
 			res.json(err);
 		}
 		else{
+			console.log("Listo: "+ {status: true, message: "Usuario creado exitosamente.", response: user});
 			res.json({status: true, message: "Usuario creado exitosamente.", response: user});
 		}
 	});
@@ -328,8 +329,8 @@ exports.doctorSignUp = function(req,res){
 console.log("Req: "+JSON.stringify(req.body));
 var location = [];
 location.push({lat: req.body.lat, lon: req.body.lon});
-var practice = [];
-practice.push(req.body.practice);
+var practice_list = [];
+practice_list.push(req.body.practice_list);
 	new Doctor({
 		name : req.body.name,
 		status : false,
@@ -344,7 +345,7 @@ practice.push(req.body.practice);
 		city : req.body.city,
 		localidad: req.body.localidad.name,
 		country : req.body.country,
-		practice_list : practice,
+		practice_list : practice_list,
 		location_list : location,
 	}).save(function(err,doctor){
 		if(err){
