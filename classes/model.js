@@ -313,7 +313,7 @@ var filtered_body = utils.remove_empty(req.body);
 		   	res.json({status: false, error: "not found"});
 	   	}
 	   	else{
-		   	res.json({status:true, message:"Usuario actualizado exitosamente."});
+		   	res.json({status:true, message:"Usuario actualizado exitosamente.", response:user});
 	   	}
 	});
 };
@@ -599,6 +599,8 @@ exports.addInsurancetype = function(req,res){
 		res.json({status: false, error: "Error. no se pudo agregar el tipo de seguro a la compañía"});
 	}	
 };
+
+
 //Read One
 exports.getInsuranceCompanyByID = function(req,res){
 	InsuranceCompany.findOne({_id:req.params.id},function(err,insurancecompany){
