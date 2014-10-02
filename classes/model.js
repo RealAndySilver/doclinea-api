@@ -122,6 +122,7 @@ var PracticeSchema= new mongoose.Schema({
 var InsuranceCompanySchema= new mongoose.Schema({
 	name : {type: String, required:false, unique: true},
 	logo : {type: String, required:false},
+	type_list: {type: Array, required:false},
 }),
 	InsuranceCompany= mongoose.model('InsuranceCompany',InsuranceCompanySchema);
 
@@ -469,7 +470,7 @@ console.log("Req: "+JSON.stringify(req.body));
 };
 
 //Delete
-exports.deleteGalleryPic = function(req,res){
+exports.removeGalleryPic = function(req,res){
 	Doctor.findOneAndUpdate(
 	    {_id: req.body.id},
 	    {$pull: {gallery: {name:req.body.name}}},
@@ -571,12 +572,32 @@ exports.createInsuranceCompany = function(req,res){
 		name : req.body.name,
 	}).save(function(err,insurancecompany){
 		if(err){
-			res.json(err);
+			res.json({status: false, error: "Error. no se pudo crear la compañía de seguros"});
 		}
 		else{
-			res.json({status: true, message: "Compañía de seguros creada exitosamente."});
+			res.json({status: true, message: "Compañía de seguros creada exitosamente.", response:insurancecompany});
 		}
 	});
+};
+exports.addInsurancetype = function(req,res){
+	if(req.body.name && req.body.category){
+		InsuranceCompany.findOneAndUpdate(
+		    {_id: req.params.insuranceCompanyID},
+		    {$addToSet: {type_list: {name:req.body.name, category:req.body.category}}},
+		    {safe: true, upsert: true},
+		    function(err, insuranceCompany) {
+		    	if(err){
+			    	res.json({status: false, error: "Error. no se pudo agregar el tipo de seguro a la compañía"});
+		    	}
+		    	else{
+			    	res.json({status: true, message: "Tipo de seguro agregado exitosamente", response:insuranceCompany});
+		    	}
+		    }
+		);
+	}
+	else{
+		res.json({status: false, error: "Error. no se pudo agregar el tipo de seguro a la compañía"});
+	}	
 };
 //Read One
 exports.getInsuranceCompanyByID = function(req,res){
@@ -615,6 +636,21 @@ var filtered_body = utils.remove_empty(req.body);
 	});
 };
 //Delete
+exports.removeInsuranceType = function(req,res){
+	InsuranceCompany.findOneAndUpdate(
+	    {_id: req.params.id},
+	    {$pull: {type_list: {name:req.body.name}}},
+	    {multi: true},
+	    function(err, insuranceCompany) {
+	        if(err){
+		    	res.json({status: false, error: "Error. no se pudo remover el tipo de seguro a la compañía"});
+	    	}
+	    	else{
+		    	res.json({status: true, message: "Tipo de seguro removido exitosamente", response:insuranceCompany});
+	    	}
+	    }
+	);
+};
 exports.deleteInsuranceCompany = function(req,res){
 	InsuranceCompany.remove({_id:req.body.id},function(err){
 		if(err){

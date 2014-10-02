@@ -82,7 +82,7 @@ app.post('/api_1.0/Doctor/AuthenticateDoctor', model.authenticateDoctor);
 app.post('/api_1.0/Doctor/UpdateDoctor', model.updateDoctor);
 app.post('/api_1.0/Doctor/UpdateProfilePic', model.updateProfilePic);
 //Doctor Delete APIs
-app.post('/api_1.0/Doctor/DeleteGalleryPic', model.deleteGalleryPic);
+app.post('/api_1.0/Doctor/RemoveGalleryPic', model.removeGalleryPic);
 app.post('/api_1.0/Doctor/DeleteDoctor', model.deleteDoctor);
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
@@ -109,12 +109,15 @@ app.post('/api_1.0/Hospital/DeleteHospital', model.deleteHospital);
 ///////////////////////////////////////////////////////////////////
 //Hospital Create APIs
 app.post('/api_1.0/InsuranceCompany/Create', model.createInsuranceCompany);
+app.post('/api_1.0/InsuranceCompany/AddInsuranceType/:insuranceCompanyID', model.addInsurancetype);
+
 //Hospital Get APIs
 app.get('/api_1.0/InsuranceCompany/GetInsuranceCompanyByID/:id', model.getInsuranceCompanyByID);
-app.get('/api_1.0/InsuranceCompany/GetAllInsuranceCompany', model.getAllInsuranceCompanies);
+app.get('/api_1.0/InsuranceCompany/GetAllInsuranceCompanies', model.getAllInsuranceCompanies);
 //Hospital Update APIs
 app.post('/api_1.0/InsuranceCompany/UpdateInsuranceCompany', model.updateInsuranceCompany);
 //Hospital Delete APIs
+app.post('/api_1.0/InsuranceCompany/RemoveInsuranceType/:id', model.removeInsuranceType);
 app.post('/api_1.0/InsuranceCompany/DeleteInsuranceCompany', model.deleteInsuranceCompany);
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
