@@ -107,21 +107,39 @@ app.post('/api_1.0/Hospital/DeleteHospital', model.deleteHospital);
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
-//Hospital Create APIs
+//InsuranceCompany Create APIs
 app.post('/api_1.0/InsuranceCompany/Create', model.createInsuranceCompany);
 app.post('/api_1.0/InsuranceCompany/AddInsuranceType/:insuranceCompanyID', model.addInsurancetype);
-
-//Hospital Get APIs
+//InsuranceCompany Get APIs
 app.get('/api_1.0/InsuranceCompany/GetInsuranceCompanyByID/:id', model.getInsuranceCompanyByID);
 app.get('/api_1.0/InsuranceCompany/GetAllInsuranceCompanies', model.getAllInsuranceCompanies);
-//Hospital Update APIs
+//InsuranceCompany Update APIs
 app.post('/api_1.0/InsuranceCompany/UpdateInsuranceCompany', model.updateInsuranceCompany);
-//Hospital Delete APIs
+//InsuranceCompany Delete APIs
 app.post('/api_1.0/InsuranceCompany/RemoveInsuranceType/:id', model.removeInsuranceType);
 app.post('/api_1.0/InsuranceCompany/DeleteInsuranceCompany', model.deleteInsuranceCompany);
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////
+//Practice Create APIs
+app.post('/api_1.0/Practice/Create', model.createPractice);
+app.post('/api_1.0/Practice/AddAppointmentReason/:practice_id', model.addAppointmentReason);
+//Practice Get APIs
+app.get('/api_1.0/Practice/GetPracticeByID/:practice_id', model.getPracticeByID);
+app.get('/api_1.0/Practice/GetAllPractices', model.getAllPractices);
+//Practice Update APIs
+app.post('/api_1.0/Practice/UpdatePractice', model.updatePractice);
+//Practice Delete APIs
+app.post('/api_1.0/Practice/RemoveAppointmentReason/:practice_id', model.removeAppointmentReason);
+app.post('/api_1.0/Practice/DeletePractice', model.deletePractice);
+///////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////
+
 
 //Create APIs
 app.post('/api_1.0/CreateAdmin', model.createAdmin);

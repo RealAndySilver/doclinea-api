@@ -7,8 +7,11 @@ mongoose.connect("mongodb://iAmUser:iAmStudio1@ds061199.mongolab.com:61199/docli
 var express = require('express');
 var knox = require('knox');
 var gcm = require('node-gcm');
-var excludepass = {password:0};
+var exclude = {password:0};
 
+//SubDocumentSchema
+var TypeSchema = new mongoose.Schema({name:String, category:String});
+var ReasonSchema = new mongoose.Schema({reason:String});
 //Admin
 var AdminSchema= new mongoose.Schema({
 	name: {type: String, required: true,unique: false,},
@@ -115,14 +118,14 @@ var HospitalSchema= new mongoose.Schema({
 var PracticeSchema= new mongoose.Schema({
 	name : {type: String, required:false, unique: true},
 	type : {type: String, required:false},
-	reason_list : {type: Array, required:false},
+	reason_list : {type: [ReasonSchema], required:false},
 }),
 	Practice= mongoose.model('Practice',PracticeSchema);
 
 var InsuranceCompanySchema= new mongoose.Schema({
 	name : {type: String, required:false, unique: true},
 	logo : {type: String, required:false},
-	type_list: {type: Array, required:false},
+	type_list: {type: [TypeSchema], required:false},
 }),
 	InsuranceCompany= mongoose.model('InsuranceCompany',InsuranceCompanySchema);
 
@@ -270,7 +273,7 @@ console.log("Req: "+JSON.stringify(req.body));
 };
 //Read One
 exports.getUserByEmail = function(req,res){
-	User.findOne({email:req.params.email},excludepass,function(err,user){
+	User.findOne({email:req.params.email},exclude,function(err,user){
 		if(!user){
 			res.json({status: false, error: "not found"});
 		}
@@ -282,7 +285,7 @@ exports.getUserByEmail = function(req,res){
 
 exports.authenticateUser = function(req,res){
 console.log("Req: "+JSON.stringify(req.body));
-	User.findOne({email:req.body.email, password: req.body.password},excludepass,function(err,user){
+	User.findOne({email:req.body.email, password: req.body.password},exclude,function(err,user){
 		if(!user){
 			res.json({status: false, error: "not found"});
 		}
@@ -294,7 +297,7 @@ console.log("Req: "+JSON.stringify(req.body));
 //Read All
 exports.getAllUsers = function(req,res){
 console.log("Cabecera: "+JSON.stringify(req.headers));
-	User.find({},excludepass,function(err,users){
+	User.find({},exclude,function(err,users){
 		if(err){
 			res.json({status: false, error: "not found"});
 		}
@@ -369,7 +372,7 @@ practice_list.push(req.body.practice_list);
 	});
 };
 exports.addPicToGallery = function(req,res){
-	Doctor.findOne({_id:req.body.id},excludepass,function(err,doctor){
+	Doctor.findOne({_id:req.body.id},exclude,function(err,doctor){
 		if(!doctor){
 			res.json({status: false, error: "not found"});
 		}
@@ -382,7 +385,7 @@ exports.addPicToGallery = function(req,res){
 
 //Read One
 exports.getDoctorByEmail = function(req,res){
-	Doctor.findOne({email:req.params.email},excludepass,function(err,doctor){
+	Doctor.findOne({email:req.params.email},exclude,function(err,doctor){
 		if(!doctor){
 			res.json({status: false, error: "not found"});
 		}
@@ -392,7 +395,7 @@ exports.getDoctorByEmail = function(req,res){
 	});
 };
 exports.getDoctorByID = function(req,res){
-	Doctor.findOne({_id:req.params.id},excludepass,function(err,doctor){
+	Doctor.findOne({_id:req.params.id},exclude,function(err,doctor){
 		if(!doctor){
 			res.json({status: false, error: "not found"});
 		}
@@ -404,7 +407,7 @@ exports.getDoctorByID = function(req,res){
 
 //Read All
 exports.getAllDoctors = function(req,res){
-	Doctor.find({},excludepass,function(err,doctors){
+	Doctor.find({},exclude,function(err,doctors){
 		if(err){
 			res.json({status: false, error: "not found"});
 		}
@@ -418,7 +421,7 @@ exports.getDoctorsByParams = function(req,res){
 var filtered_body = utils.remove_empty(req.body);
 console.log("Req: "+JSON.stringify(filtered_body));
 	Doctor.find(req.body,
-		excludepass,function(err,doctors){
+		exclude,function(err,doctors){
 		if(doctors.length<=0){
 			res.json({status: false, error: "not found"});
 		}
@@ -446,7 +449,7 @@ console.log("Req: "+JSON.stringify(filtered_body));
 	});
 };
 exports.updateProfilePic = function(req,res){
-	Doctor.findOne({_id:req.body.id},excludepass,function(err,doctor){
+	Doctor.findOne({_id:req.body.id},exclude,function(err,doctor){
 		if(!doctor){
 			res.json({status: false, error: "not found"});
 		}
@@ -459,7 +462,7 @@ exports.updateProfilePic = function(req,res){
 
 exports.authenticateDoctor = function(req,res){
 console.log("Req: "+JSON.stringify(req.body));
-	Doctor.findOne({email:req.body.email, password: req.body.password},excludepass,function(err,doctor){
+	Doctor.findOne({email:req.body.email, password: req.body.password},exclude,function(err,doctor){
 		if(!doctor){
 			res.json({status: false, error: "not found"});
 		}
@@ -599,8 +602,6 @@ exports.addInsurancetype = function(req,res){
 		res.json({status: false, error: "Error. no se pudo agregar el tipo de seguro a la compañía"});
 	}	
 };
-
-
 //Read One
 exports.getInsuranceCompanyByID = function(req,res){
 	InsuranceCompany.findOne({_id:req.params.id},function(err,insurancecompany){
@@ -641,7 +642,7 @@ var filtered_body = utils.remove_empty(req.body);
 exports.removeInsuranceType = function(req,res){
 	InsuranceCompany.findOneAndUpdate(
 	    {_id: req.params.id},
-	    {$pull: {type_list: {name:req.body.name}}},
+	    {$pull: {type_list: {_id:req.body.id}}},
 	    {multi: true},
 	    function(err, insuranceCompany) {
 	        if(err){
@@ -666,6 +667,112 @@ exports.deleteInsuranceCompany = function(req,res){
 //////////////////////////////////
 //End of InsuranceCompany CRUD////
 //////////////////////////////////
+
+//////////////////////////////////////
+//Practice CRUD starts here///
+//////////////////////////////////////
+//Create
+exports.createPractice = function(req,res){
+	new Practice({
+		name : req.body.name,
+		type : req.body.type,
+	}).save(function(err,practice){
+		if(err){
+			res.json({status: false, error: "Error. no se pudo crear la especialidad de seguros"});
+		}
+		else{
+			res.json({status: true, message: "Especialidad creada exitosamente.", response:practice});
+		}
+	});
+};
+exports.addAppointmentReason = function(req,res){
+	if(req.body.reason){
+		Practice.findOneAndUpdate(
+		    {_id: req.params.practice_id},
+		    {$addToSet: {reason_list: {reason:req.body.reason}}},
+		    {safe: true, upsert: true},
+		    function(err, practice) {
+		    	if(err){
+			    	res.json({status: false, error: "Error. no se pudo agregar este motivo de consulta."});
+		    	}
+		    	else{
+			    	res.json({status: true, message: "Motivo de consulta agregado exitosamente", response:practice});
+		    	}
+		    }
+		);
+	}
+	else{
+		res.json({status: false, error: "Error. no se pudo agregar un motivo de consulta"});
+	}	
+};
+//Read One
+exports.getPracticeByID = function(req,res){
+	Practice.findOne({_id:req.params.practice_id},function(err,practice){
+		if(!practice){
+			res.json({status: false, error: "not found"});
+		}
+		else{
+			res.json({status: true, response: practice});
+		}
+	});
+};
+//Read All
+exports.getAllPractices = function(req,res){
+	Practice.find({},function(err,practices){
+		if(err){
+			res.json({status: false, error: "not found"});
+		}
+		else{
+			res.json({status: true, response: practices});
+		}
+	});
+};
+//Update
+exports.updatePractice = function(req,res){
+var filtered_body = utils.remove_empty(req.body);
+	Practice.findOneAndUpdate({_id:req.body.id},
+	   {$set:filtered_body}, 
+	   	function(err,practice){
+	   	if(!practice){
+		   	res.json({status: false, error: "not found"});
+	   	}
+	   	else{
+		   	res.json({status:true, message:"Especialidad actualizada exitosamente."});
+	   	}
+	});
+};
+//Delete
+exports.removeAppointmentReason = function(req,res){
+	Practice.findOneAndUpdate(
+	    {_id: req.params.practiceID},
+	    {$pull: {type_list: {_id:req.body.reason_id}}},
+	    {multi: true},
+	    function(err, practice) {
+	        if(err){
+		    	res.json({status: false, error: "Error. no se pudo remover el motivo de consulta para esta especialidad."});
+	    	}
+	    	else{
+		    	res.json({status: true, message: "Motivo de consulta removido exitosamente", response:practice});
+	    	}
+	    }
+	);
+};
+exports.deletePractice = function(req,res){
+	Practice.remove({_id:req.body.id},function(err){
+		if(err){
+			res.json(error.notFound);
+		}
+		else{
+			res.json({status:true, message:"Especialidad de seguros borrada exitosamente."});
+		}
+	});
+};
+//////////////////////////////////
+//End of InsuranceCompany CRUD////
+//////////////////////////////////
+
+
+
 exports.sendPush = function (req,res){
 var android = req.body.android ? true:false;
 var ios = req.body.ios ? true:false;
@@ -795,9 +902,10 @@ var ios = req.body.ios ? true:false;
 };
 
 
+/////////////////////////////////
+//Functions//////////////////////
+/////////////////////////////////
 
-//Functions//
-////////////
 var uploadImage = function(file,object,type,owner){
 	if(!file){
 		object.profile_pic = {name:"", image_url: ""};
