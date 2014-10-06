@@ -53,7 +53,7 @@ app.get('/*', function(req, res, next){
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
 //User Create APIs
-app.post('/api_1.0/User/SignUp', model.signUp);
+app.post('/api_1.0/User/Create', model.createUser);
 //User Read APIs
 app.get('/api_1.0/User/GetUserByEmail/:email', model.getUserByEmail);
 app.get('/api_1.0/User/GetAllUsers', model.getAllUsers);
@@ -70,7 +70,7 @@ app.post('/api_1.0/User/DeleteUser', model.deleteUser);
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
 //Doctor Create APIs
-app.post('/api_1.0/Doctor/SignUp', model.doctorSignUp);
+app.post('/api_1.0/Doctor/Create', model.createDoctor);
 app.post('/api_1.0/Doctor/AddPicToGallery', model.addPicToGallery);
 //Doctor Read APIs
 app.get('/api_1.0/Doctor/GetDoctorByEmail/:email', model.getDoctorByEmail);

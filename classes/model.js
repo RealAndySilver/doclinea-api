@@ -31,7 +31,7 @@ var UserSchema= new mongoose.Schema({
 	phone : {type: String, required:false},
 	country : {type: String, required:false},
 	city : {type: String, required:false},
-	localidad : {type: String, required:false},
+	localidad : {type: Object, required:false},
 	address : {type: String, required:false},
 	status : {type: Number, required:false},
 	insurance : {type: String, required:false},
@@ -62,7 +62,7 @@ var DoctorSchema= new mongoose.Schema({
 	phone : {type: String, required:false},
 	address : {type: String, required:false},
 	city : {type: String, required:false},
-	localidad : {type: String, required:false},
+	localidad : {type: Object, required:false},
 	country : {type: String, required:false, unique:false,},
 	location_list : {type: Array, required:false},
 	hospital_list : {type: Array, required:false},
@@ -246,7 +246,7 @@ exports.deleteAdmin = function(req,res){
 //User CRUD starts here//////////
 //////////////////////////////////
 //Create
-exports.signUp = function(req,res){
+exports.createUser = function(req,res){
 console.log("Req: "+JSON.stringify(req.body));
 	new User({
 		email : req.body.email,
@@ -339,10 +339,13 @@ exports.deleteUser = function(req,res){
 //Doctor CRUD starts here//////////
 //////////////////////////////////
 //Create
-exports.doctorSignUp = function(req,res){
+exports.createDoctor = function(req,res){
 console.log("Req: "+JSON.stringify(req.body));
 var location = [];
 location.push({lat: req.body.lat, lon: req.body.lon});
+if(req.body.localidad){
+	req.body.localidad = JSON.parse(req.body.localidad);
+}
 var practice_list = [];
 practice_list.push(req.body.practice_list);
 	new Doctor({
@@ -357,7 +360,7 @@ practice_list.push(req.body.practice_list);
 		phone : req.body.phone,
 		address : req.body.address,
 		city : req.body.city,
-		localidad: req.body.localidad.name,
+		localidad: req.body.localidad,
 		country : req.body.country,
 		practice_list : practice_list,
 		location_list : location,
@@ -367,7 +370,8 @@ practice_list.push(req.body.practice_list);
 			res.json(err);
 		}
 		else{
-			res.json({status: true, message: "Doctor creado exitosamente."});
+			doctor.password = 'Protected';
+			res.json({status: true, message: "Doctor creado exitosamente.", response: doctor});
 		}
 	});
 };
@@ -417,7 +421,6 @@ exports.getAllDoctors = function(req,res){
 	});
 };
 exports.getDoctorsByParams = function(req,res){
-
 var filtered_body = utils.remove_empty(req.body);
 console.log("Req: "+JSON.stringify(filtered_body));
 	Doctor.find(req.body,
@@ -432,18 +435,23 @@ console.log("Req: "+JSON.stringify(filtered_body));
 };
 //Update
 exports.updateDoctor = function(req,res){
-var filtered_body = utils.remove_empty(req.body);
+req.body._id='';
+req.body.email = '';
+console.log("error: "+JSON.stringify(req.body));
 if(req.body.localidad){
-	req.body.localidad=req.body.localidad.name;
+	req.body.localidad = JSON.parse(req.body.localidad);
 }
-console.log("Req: "+JSON.stringify(filtered_body));
+var filtered_body = utils.remove_empty(req.body);
+console.log("Req: "+ JSON.stringify(filtered_body));
 	Doctor.findOneAndUpdate({_id:req.params.doctor_id},
 	   {$set:filtered_body},
 	   	function(err,doctor){
+	   	console.log("error: "+err);
 	   	if(!doctor){
 		   	res.json({status: false, error: "not found"});
 	   	}
 	   	else{
+	   		doctor.password = 'protected';
 		   	res.json({status:true, message:"Doctor actualizado exitosamente.", response:doctor});
 	   	}
 	});
