@@ -438,14 +438,14 @@ if(req.body.localidad){
 }
 console.log("Req: "+JSON.stringify(filtered_body));
 	Doctor.findOneAndUpdate({_id:req.body.id},
-		exclude,
-	   {$set:filtered_body}, 
+	   {$set:filtered_body},
+	   exclude,
 	   	function(err,doctor){
 	   	if(!doctor){
 		   	res.json({status: false, error: "not found"});
 	   	}
 	   	else{
-		   	res.json({status:true, message:"Usuario actualizado exitosamente.", response:doctor});
+		   	res.json({status:true, message:"Doctor actualizado exitosamente.", response:doctor});
 	   	}
 	});
 };
