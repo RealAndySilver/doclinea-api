@@ -309,7 +309,7 @@ console.log("Cabecera: "+JSON.stringify(req.headers));
 //Update
 exports.updateUser = function(req,res){
 var filtered_body = utils.remove_empty(req.body);
-	User.findOneAndUpdate({email:req.body.email},
+	User.findOneAndUpdate({_id:req.params.user_id},
 	   {$set:filtered_body}, 
 	   	function(err,user){
 	   	if(!user){
@@ -437,7 +437,7 @@ if(req.body.localidad){
 	req.body.localidad=req.body.localidad.name;
 }
 console.log("Req: "+JSON.stringify(filtered_body));
-	Doctor.findOneAndUpdate({_id:req.body.id},
+	Doctor.findOneAndUpdate({_id:req.params.doctor_id},
 	   {$set:filtered_body},
 	   	function(err,doctor){
 	   	if(!doctor){

@@ -59,7 +59,7 @@ app.get('/api_1.0/User/GetUserByEmail/:email', model.getUserByEmail);
 app.get('/api_1.0/User/GetAllUsers', model.getAllUsers);
 app.post('/api_1.0/User/AuthenticateUser', model.authenticateUser);
 //User Update APIs
-app.post('/api_1.0/User/UpdateUser', model.updateUser);
+app.post('/api_1.0/User/UpdateUser/:user_id', model.updateUser);
 //User Delete APIs
 app.post('/api_1.0/User/DeleteUser', model.deleteUser);
 ///////////////////////////////////////////////////////////////////
@@ -79,7 +79,7 @@ app.get('/api_1.0/Doctor/GetAllDoctors', model.getAllDoctors);
 app.post('/api_1.0/Doctor/GetDoctorsByParams', model.getDoctorsByParams);
 app.post('/api_1.0/Doctor/AuthenticateDoctor', model.authenticateDoctor);
 //Doctor Update APIs
-app.post('/api_1.0/Doctor/UpdateDoctor', model.updateDoctor);
+app.post('/api_1.0/Doctor/UpdateDoctor/:doctor_id', model.updateDoctor);
 app.post('/api_1.0/Doctor/UpdateProfilePic', model.updateProfilePic);
 //Doctor Delete APIs
 app.post('/api_1.0/Doctor/RemoveGalleryPic', model.removeGalleryPic);
