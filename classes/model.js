@@ -346,7 +346,7 @@ console.log("Req: "+JSON.stringify(req.body));
 var location = [];
 location.push({lat: req.body.lat, lon: req.body.lon});
 if(req.body.localidad){
-	req.body.localidad = JSON.parse(req.body.localidad);
+	req.body.localidad = utils.isJson(req.body.localidad) ? JSON.parse(req.body.localidad): req.body.localidad ;
 }
 var practice_list = [];
 practice_list.push(req.body.practice_list);
@@ -441,7 +441,7 @@ req.body._id='';
 req.body.email = '';
 console.log("error: "+JSON.stringify(req.body));
 if(req.body.localidad){
-	req.body.localidad = JSON.parse(req.body.localidad);
+	req.body.localidad = utils.isJson(req.body.localidad) ? JSON.parse(req.body.localidad): req.body.localidad ;
 }
 var filtered_body = utils.remove_empty(req.body);
 console.log("Req: "+ JSON.stringify(filtered_body));

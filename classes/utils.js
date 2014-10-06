@@ -9,3 +9,12 @@ exports.remove_empty = function trim_nulls(data) {
   }
   return data;
 };
+
+exports.isJson = function(str) {
+    try {
+        JSON.parse(str);
+    } catch (e) {
+        return false;
+    }
+    return true;
+}
