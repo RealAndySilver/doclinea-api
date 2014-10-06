@@ -308,6 +308,8 @@ console.log("Cabecera: "+JSON.stringify(req.headers));
 };
 //Update
 exports.updateUser = function(req,res){
+req.body._id = '';
+req.body.email = '';
 var filtered_body = utils.remove_empty(req.body);
 	User.findOneAndUpdate({_id:req.params.user_id},
 	   {$set:filtered_body}, 
@@ -457,6 +459,7 @@ console.log("Req: "+ JSON.stringify(filtered_body));
 	});
 };
 exports.updateProfilePic = function(req,res){
+console.log('Llega: '+JSON.stringify(req.files))
 	Doctor.findOne({_id:req.params.doctor_id},exclude,function(err,doctor){
 		if(!doctor){
 			res.json({status: false, error: "not found"});
@@ -919,6 +922,7 @@ var uploadImage = function(file,object,type,owner){
 		object.profile_pic = {name:"", image_url: ""};
 		object.save(function(err,doctor){
 		});
+		console.log('No hay archivo');
 		return;
 	} 
 	var tmp_path_image_url = file.path;

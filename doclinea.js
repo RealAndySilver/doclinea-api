@@ -57,11 +57,11 @@ app.post('/api_1.0/User/Create', model.createUser);
 //User Read APIs
 app.get('/api_1.0/User/GetUserByEmail/:email', model.getUserByEmail);
 app.get('/api_1.0/User/GetAllUsers', model.getAllUsers);
-app.post('/api_1.0/User/AuthenticateUser', model.authenticateUser);
+app.post('/api_1.0/User/Authenticate', model.authenticateUser);
 //User Update APIs
-app.post('/api_1.0/User/UpdateUser/:user_id', model.updateUser);
+app.post('/api_1.0/User/Update/:user_id', model.updateUser);
 //User Delete APIs
-app.post('/api_1.0/User/DeleteUser', model.deleteUser);
+app.post('/api_1.0/User/Delete', model.deleteUser);
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
@@ -77,9 +77,9 @@ app.get('/api_1.0/Doctor/GetDoctorByEmail/:email', model.getDoctorByEmail);
 app.get('/api_1.0/Doctor/GetDoctorByID/:id', model.getDoctorByID);
 app.get('/api_1.0/Doctor/GetAllDoctors', model.getAllDoctors);
 app.post('/api_1.0/Doctor/GetDoctorsByParams', model.getDoctorsByParams);
-app.post('/api_1.0/Doctor/AuthenticateDoctor', model.authenticateDoctor);
+app.post('/api_1.0/Doctor/Authenticate', model.authenticateDoctor);
 //Doctor Update APIs
-app.post('/api_1.0/Doctor/UpdateDoctor/:doctor_id', model.updateDoctor);
+app.post('/api_1.0/Doctor/Update/:doctor_id', model.updateDoctor);
 app.post('/api_1.0/Doctor/UpdateProfilePic/:doctor_id', model.updateProfilePic);
 //Doctor Delete APIs
 app.post('/api_1.0/Doctor/RemoveGalleryPic', model.removeGalleryPic);
@@ -97,9 +97,9 @@ app.post('/api_1.0/Hospital/Create', model.createHospital);
 app.get('/api_1.0/Hospital/GetHospitalByID/:id', model.getHospitalByID);
 app.get('/api_1.0/Hospital/GetAllHospitals', model.getAllHospitals);
 //Hospital Update APIs
-app.post('/api_1.0/Hospital/UpdateHospital', model.updateHospital);
+app.post('/api_1.0/Hospital/Update', model.updateHospital);
 //Hospital Delete APIs
-app.post('/api_1.0/Hospital/DeleteHospital', model.deleteHospital);
+app.post('/api_1.0/Hospital/Delete', model.deleteHospital);
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
@@ -114,10 +114,10 @@ app.post('/api_1.0/InsuranceCompany/AddInsuranceType/:insuranceCompanyID', model
 app.get('/api_1.0/InsuranceCompany/GetInsuranceCompanyByID/:id', model.getInsuranceCompanyByID);
 app.get('/api_1.0/InsuranceCompany/GetAllInsuranceCompanies', model.getAllInsuranceCompanies);
 //InsuranceCompany Update APIs
-app.post('/api_1.0/InsuranceCompany/UpdateInsuranceCompany', model.updateInsuranceCompany);
+app.post('/api_1.0/InsuranceCompany/Update', model.updateInsuranceCompany);
 //InsuranceCompany Delete APIs
 app.post('/api_1.0/InsuranceCompany/RemoveInsuranceType/:id', model.removeInsuranceType);
-app.post('/api_1.0/InsuranceCompany/DeleteInsuranceCompany', model.deleteInsuranceCompany);
+app.post('/api_1.0/InsuranceCompany/Delete', model.deleteInsuranceCompany);
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
@@ -132,10 +132,10 @@ app.post('/api_1.0/Practice/AddAppointmentReason/:practice_id', model.addAppoint
 app.get('/api_1.0/Practice/GetPracticeByID/:practice_id', model.getPracticeByID);
 app.get('/api_1.0/Practice/GetAllPractices', model.getAllPractices);
 //Practice Update APIs
-app.post('/api_1.0/Practice/UpdatePractice', model.updatePractice);
+app.post('/api_1.0/Practice/Update', model.updatePractice);
 //Practice Delete APIs
 app.post('/api_1.0/Practice/RemoveAppointmentReason/:practice_id', model.removeAppointmentReason);
-app.post('/api_1.0/Practice/DeletePractice', model.deletePractice);
+app.post('/api_1.0/Practice/Delete', model.deletePractice);
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
