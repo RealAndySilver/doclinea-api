@@ -449,7 +449,7 @@ console.log("Req: "+JSON.stringify(filtered_body));
 	});
 };
 exports.updateProfilePic = function(req,res){
-	Doctor.findOne({_id:req.body.id},exclude,function(err,doctor){
+	Doctor.findOne({_id:req.params.doctor_id},exclude,function(err,doctor){
 		if(!doctor){
 			res.json({status: false, error: "not found"});
 		}
@@ -484,7 +484,7 @@ exports.removeGalleryPic = function(req,res){
 	);
 };
 exports.deleteDoctor = function(req,res){
-	Doctor.remove({email:req.body.email},function(err){
+	Doctor.remove({_id:req.body.id},function(err){
 		if(err){
 			res.json(error.notFound);
 		}

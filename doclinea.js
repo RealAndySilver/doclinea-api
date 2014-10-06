@@ -80,7 +80,7 @@ app.post('/api_1.0/Doctor/GetDoctorsByParams', model.getDoctorsByParams);
 app.post('/api_1.0/Doctor/AuthenticateDoctor', model.authenticateDoctor);
 //Doctor Update APIs
 app.post('/api_1.0/Doctor/UpdateDoctor/:doctor_id', model.updateDoctor);
-app.post('/api_1.0/Doctor/UpdateProfilePic', model.updateProfilePic);
+app.post('/api_1.0/Doctor/UpdateProfilePic/:doctor_id', model.updateProfilePic);
 //Doctor Delete APIs
 app.post('/api_1.0/Doctor/RemoveGalleryPic', model.removeGalleryPic);
 app.post('/api_1.0/Doctor/DeleteDoctor', model.deleteDoctor);
