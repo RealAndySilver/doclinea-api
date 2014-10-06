@@ -439,7 +439,6 @@ if(req.body.localidad){
 console.log("Req: "+JSON.stringify(filtered_body));
 	Doctor.findOneAndUpdate({_id:req.body.id},
 	   {$set:filtered_body},
-	   exclude,
 	   	function(err,doctor){
 	   	if(!doctor){
 		   	res.json({status: false, error: "not found"});
