@@ -71,7 +71,7 @@ app.post('/api_1.0/User/Delete', model.deleteUser);
 ///////////////////////////////////////////////////////////////////
 //Doctor Create APIs
 app.post('/api_1.0/Doctor/Create', model.createDoctor);
-app.post('/api_1.0/Doctor/AddPicToGallery', model.addPicToGallery);
+app.post('/api_1.0/Doctor/AddPicToGallery/:doctor_id', model.addPicToGallery);
 //Doctor Read APIs
 app.get('/api_1.0/Doctor/GetDoctorByEmail/:email', model.getDoctorByEmail);
 app.get('/api_1.0/Doctor/GetDoctorByID/:id', model.getDoctorByID);
@@ -82,7 +82,7 @@ app.post('/api_1.0/Doctor/Authenticate', model.authenticateDoctor);
 app.post('/api_1.0/Doctor/Update/:doctor_id', model.updateDoctor);
 app.post('/api_1.0/Doctor/UpdateProfilePic/:doctor_id', model.updateProfilePic);
 //Doctor Delete APIs
-app.post('/api_1.0/Doctor/RemoveGalleryPic', model.removeGalleryPic);
+app.post('/api_1.0/Doctor/RemoveGalleryPic/:doctor_id', model.removeGalleryPic);
 app.post('/api_1.0/Doctor/DeleteDoctor', model.deleteDoctor);
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////

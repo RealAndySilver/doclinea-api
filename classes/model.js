@@ -65,6 +65,7 @@ var DoctorSchema= new mongoose.Schema({
 	localidad : {type: Object, required:false},
 	country : {type: String, required:false, unique:false,},
 	location_list : {type: Array, required:false},
+	loc : {type: [Number], index: { type: '2dsphere', sparse: true }},
 	hospital_list : {type: Array, required:false},
 	insurance_list : {type: Array, required:false},
 	education_list : {type: Array, required:false},
@@ -378,7 +379,7 @@ practice_list.push(req.body.practice_list);
 	});
 };
 exports.addPicToGallery = function(req,res){
-	Doctor.findOne({_id:req.body.id},exclude,function(err,doctor){
+	Doctor.findOne({_id:req.params.doctor_id},exclude,function(err,doctor){
 		if(!doctor){
 			res.json({status: false, error: "not found"});
 		}
@@ -443,6 +444,9 @@ console.log("error: "+JSON.stringify(req.body));
 if(req.body.localidad){
 	req.body.localidad = utils.isJson(req.body.localidad) ? JSON.parse(req.body.localidad): req.body.localidad ;
 }
+if(req.body.location_list){
+	req.body.location_list = utils.isJson(req.body.location_list) ? JSON.parse(req.body.location_list): req.body.location_list ;
+}
 var filtered_body = utils.remove_empty(req.body);
 console.log("Req: "+ JSON.stringify(filtered_body));
 	Doctor.findOneAndUpdate({_id:req.params.doctor_id},
@@ -486,8 +490,8 @@ console.log("Req: "+JSON.stringify(req.body));
 //Delete
 exports.removeGalleryPic = function(req,res){
 	Doctor.findOneAndUpdate(
-	    {_id: req.body.id},
-	    {$pull: {gallery: {name:req.body.name}}},
+	    {_id: req.params.doctor_id},
+	    {$pull: {gallery: {_id:req.body.image_id}}},
 	    {multi: true},
 	    function(err, doctor) {
 	        res.json({res:'borrado', obj:doctor});
@@ -961,7 +965,7 @@ var uploadImage = function(file,object,type,owner){
 						else{
 							if(owner=="doctor"){
 								if(type=="profile"){
-									object.profile_pic = {name:image.name, image_url: image.url, id: image._id};
+									object.profile_pic = {name:image.name, image_url: image.url, _id: image._id};
 									object.save(function(err,doctor){
 											return {status: true, response: {image_url:image.url}};
 									});
@@ -969,7 +973,7 @@ var uploadImage = function(file,object,type,owner){
 								else if(type=="gallery"){
 									Doctor.findOneAndUpdate(
 									    {_id: object._id},
-									    {$push: {gallery: {image_url:image.url, name:file.name}}},
+									    {$push: {gallery: {image_url:image.url, name:file.name, _id: image._id}}},
 									    {safe: true, upsert: true},
 									    function(err, doctor) {
 									        console.log("Doctor: "+doctor);
