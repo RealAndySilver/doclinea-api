@@ -484,11 +484,14 @@ console.log("error: "+JSON.stringify(req.body));
 if(req.body.localidad){
 	req.body.localidad = utils.isJson(req.body.localidad) ? JSON.parse(req.body.localidad): req.body.localidad ;
 }
-if(req.body.lat && req.body.lon){
-	coordinates.push(req.body.lon);
-	coordinates.push(req.body.lat);
+if(req.body.location_list){
+	req.body.location_list = utils.isJson(req.body.location_list) ? JSON.parse(req.body.location_list): req.body.location_list ;
+}
+if(req.body.location_list.lat && req.body.location_list.lon){
+	coordinates.push(req.body.location_list.lon);
+	coordinates.push(req.body.location_list.lat);
 	location_list.push({location_address:req.body.location_address, location_name:req.body.location_name, lat:req.body.lat, lon:req.body.lon});
-	location = {loc:{type:'Point', coordinates: coordinates}};
+	req.body.location = {type:'Point', coordinates: coordinates};
 }
 if(req.body.location_list){
 	req.body.location_list = utils.isJson(req.body.location_list) ? JSON.parse(req.body.location_list): req.body.location_list ;
