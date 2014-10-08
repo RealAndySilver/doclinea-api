@@ -65,7 +65,7 @@ var DoctorSchema= new mongoose.Schema({
 	localidad : {type: Object, required:false},
 	country : {type: String, required:false, unique:false,},
 	location_list : {type: Array, required:false},
-	loc : {type: [Number], index: { type: '2dsphere', sparse: true }},
+	location : {type: {type: String}, 'coordinates':{type:[Number]}},
 	hospital_list : {type: Array, required:false},
 	insurance_list : {type: Array, required:false},
 	education_list : {type: Array, required:false},
@@ -77,7 +77,8 @@ var DoctorSchema= new mongoose.Schema({
 	review_list : {type: Array, required:false},
 	description : {type: String, required:false},
 	language_list : {type: Array, required:false},
-}),
+});
+	DoctorSchema.index({location:"2dsphere", required:false})
 	Doctor= mongoose.model('Doctor',DoctorSchema);
 
 var AppointmentSchema= new mongoose.Schema({
@@ -345,12 +346,24 @@ exports.deleteUser = function(req,res){
 exports.createDoctor = function(req,res){
 console.log("Req: "+JSON.stringify(req.body));
 var location = [];
-location.push({lat: req.body.lat, lon: req.body.lon});
+var coordinates = [];
+if(req.body.lat && req.body.lon){
+	coordinates.push(req.body.lon);
+	coordinates.push(req.body.lat);
+	location.push({address: req.body.address, name:req.body.location_name, loc:{type:'Point', coordinates: coordinates}});
+}
+else{
+	coordinates.push(0);
+	coordinates.push(0);
+	location.push({address: req.body.address, name:req.body.location_name, loc:{type:'Point', coordinates: coordinates}});
+}
 if(req.body.localidad){
 	req.body.localidad = utils.isJson(req.body.localidad) ? JSON.parse(req.body.localidad): req.body.localidad ;
 }
 var practice_list = [];
 practice_list.push(req.body.practice_list);
+
+
 	new Doctor({
 		name : req.body.name,
 		status : false,
@@ -367,6 +380,7 @@ practice_list.push(req.body.practice_list);
 		country : req.body.country,
 		practice_list : practice_list,
 		location_list : location,
+		location: location[0].loc
 	}).save(function(err,doctor){
 		if(err){
 		console.log("Err: "+err);
@@ -425,14 +439,29 @@ exports.getAllDoctors = function(req,res){
 };
 exports.getDoctorsByParams = function(req,res){
 var filtered_body = utils.remove_empty(req.body);
-console.log("Req: "+JSON.stringify(filtered_body));
-	Doctor.find(req.body,
-		exclude,function(err,doctors){
-		if(doctors.length<=0){
-			res.json({status: false, error: "not found"});
+var query = {};
+query = req.body;
+var meters = parseInt(req.body.meters);
+delete req.body.meters;
+if(req.body.lat && req.body.lon){
+	query.location = {$near :{$geometry :{type : "Point" ,coordinates :[req.body.lon, req.body.lat]},$maxDistance : meters}};	
+}
+delete query.lat;
+delete query.lon;
+console.log("Req: "+JSON.stringify(query));
+	Doctor.find(query,
+		exclude,
+		function(err,doctors){
+		if(!err){
+			if(doctors.length<=0){
+				res.json({status: false, error: "not found"});
+			}
+			else{
+				res.json({status: true, response: doctors});
+			}
 		}
 		else{
-			res.json({status: true, response: doctors});
+			res.json({status: false, error: err});
 		}
 	});
 };
@@ -443,6 +472,11 @@ req.body.email = '';
 console.log("error: "+JSON.stringify(req.body));
 if(req.body.localidad){
 	req.body.localidad = utils.isJson(req.body.localidad) ? JSON.parse(req.body.localidad): req.body.localidad ;
+}
+if(req.body.lat && req.body.lon){
+	coordinates.push(req.body.lon);
+	coordinates.push(req.body.lat);
+	location.push({address: req.body.address, name:req.body.location_name, loc:{type:'Point', coordinates: coordinates}});
 }
 if(req.body.location_list){
 	req.body.location_list = utils.isJson(req.body.location_list) ? JSON.parse(req.body.location_list): req.body.location_list ;
@@ -489,12 +523,20 @@ console.log("Req: "+JSON.stringify(req.body));
 
 //Delete
 exports.removeGalleryPic = function(req,res){
+console.log("Req: "+JSON.stringify(req.body));
+
 	Doctor.findOneAndUpdate(
 	    {_id: req.params.doctor_id},
-	    {$pull: {gallery: {_id:req.body.image_id}}},
+	    {$pull: {gallery: {name:req.body.name}}},
 	    {multi: true},
 	    function(err, doctor) {
-	        res.json({res:'borrado', obj:doctor});
+	    	if(!doctor){
+		    	res.json({status:false, message: 'Error al borrar'});
+	    	}
+	    	else{
+	    		console.log("Borrado: "+JSON.stringify(doctor.gallery));
+	        	res.json({status:true, message: 'Borrado' ,response:doctor});
+	    	}
 	    }
 	);
 };
@@ -965,7 +1007,7 @@ var uploadImage = function(file,object,type,owner){
 						else{
 							if(owner=="doctor"){
 								if(type=="profile"){
-									object.profile_pic = {name:image.name, image_url: image.url, _id: image._id};
+									object.profile_pic = {name:image.name, image_url: image.url, id: image._id};
 									object.save(function(err,doctor){
 											return {status: true, response: {image_url:image.url}};
 									});
@@ -973,7 +1015,7 @@ var uploadImage = function(file,object,type,owner){
 								else if(type=="gallery"){
 									Doctor.findOneAndUpdate(
 									    {_id: object._id},
-									    {$push: {gallery: {image_url:image.url, name:file.name, _id: image._id}}},
+									    {$push: {gallery: {image_url:image.url, name:file.name, id: image._id}}},
 									    {safe: true, upsert: true},
 									    function(err, doctor) {
 									        console.log("Doctor: "+doctor);

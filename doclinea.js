@@ -55,8 +55,8 @@ app.get('/*', function(req, res, next){
 //User Create APIs
 app.post('/api_1.0/User/Create', model.createUser);
 //User Read APIs
-app.get('/api_1.0/User/GetUserByEmail/:email', model.getUserByEmail);
-app.get('/api_1.0/User/GetAllUsers', model.getAllUsers);
+app.get('/api_1.0/User/GetByEmail/:email', model.getUserByEmail);
+app.get('/api_1.0/User/GetAll', model.getAllUsers);
 app.post('/api_1.0/User/Authenticate', model.authenticateUser);
 //User Update APIs
 app.post('/api_1.0/User/Update/:user_id', model.updateUser);
@@ -73,17 +73,17 @@ app.post('/api_1.0/User/Delete', model.deleteUser);
 app.post('/api_1.0/Doctor/Create', model.createDoctor);
 app.post('/api_1.0/Doctor/AddPicToGallery/:doctor_id', model.addPicToGallery);
 //Doctor Read APIs
-app.get('/api_1.0/Doctor/GetDoctorByEmail/:email', model.getDoctorByEmail);
-app.get('/api_1.0/Doctor/GetDoctorByID/:id', model.getDoctorByID);
-app.get('/api_1.0/Doctor/GetAllDoctors', model.getAllDoctors);
-app.post('/api_1.0/Doctor/GetDoctorsByParams', model.getDoctorsByParams);
+app.get('/api_1.0/Doctor/GetByEmail/:email', model.getDoctorByEmail);
+app.get('/api_1.0/Doctor/GetByID/:id', model.getDoctorByID);
+app.get('/api_1.0/Doctor/GetAll', model.getAllDoctors);
+app.post('/api_1.0/Doctor/GetByParams', model.getDoctorsByParams);
 app.post('/api_1.0/Doctor/Authenticate', model.authenticateDoctor);
 //Doctor Update APIs
 app.post('/api_1.0/Doctor/Update/:doctor_id', model.updateDoctor);
 app.post('/api_1.0/Doctor/UpdateProfilePic/:doctor_id', model.updateProfilePic);
 //Doctor Delete APIs
 app.post('/api_1.0/Doctor/RemoveGalleryPic/:doctor_id', model.removeGalleryPic);
-app.post('/api_1.0/Doctor/DeleteDoctor', model.deleteDoctor);
+app.post('/api_1.0/Doctor/Delete', model.deleteDoctor);
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
@@ -94,8 +94,8 @@ app.post('/api_1.0/Doctor/DeleteDoctor', model.deleteDoctor);
 //Hospital Create APIs
 app.post('/api_1.0/Hospital/Create', model.createHospital);
 //Hospital Get APIs
-app.get('/api_1.0/Hospital/GetHospitalByID/:id', model.getHospitalByID);
-app.get('/api_1.0/Hospital/GetAllHospitals', model.getAllHospitals);
+app.get('/api_1.0/Hospital/GetByID/:id', model.getHospitalByID);
+app.get('/api_1.0/Hospital/GetAll', model.getAllHospitals);
 //Hospital Update APIs
 app.post('/api_1.0/Hospital/Update', model.updateHospital);
 //Hospital Delete APIs
@@ -111,8 +111,8 @@ app.post('/api_1.0/Hospital/Delete', model.deleteHospital);
 app.post('/api_1.0/InsuranceCompany/Create', model.createInsuranceCompany);
 app.post('/api_1.0/InsuranceCompany/AddInsuranceType/:insuranceCompanyID', model.addInsurancetype);
 //InsuranceCompany Get APIs
-app.get('/api_1.0/InsuranceCompany/GetInsuranceCompanyByID/:id', model.getInsuranceCompanyByID);
-app.get('/api_1.0/InsuranceCompany/GetAllInsuranceCompanies', model.getAllInsuranceCompanies);
+app.get('/api_1.0/InsuranceCompany/GetByID/:id', model.getInsuranceCompanyByID);
+app.get('/api_1.0/InsuranceCompany/GetAll', model.getAllInsuranceCompanies);
 //InsuranceCompany Update APIs
 app.post('/api_1.0/InsuranceCompany/Update', model.updateInsuranceCompany);
 //InsuranceCompany Delete APIs
@@ -129,8 +129,8 @@ app.post('/api_1.0/InsuranceCompany/Delete', model.deleteInsuranceCompany);
 app.post('/api_1.0/Practice/Create', model.createPractice);
 app.post('/api_1.0/Practice/AddAppointmentReason/:practice_id', model.addAppointmentReason);
 //Practice Get APIs
-app.get('/api_1.0/Practice/GetPracticeByID/:practice_id', model.getPracticeByID);
-app.get('/api_1.0/Practice/GetAllPractices', model.getAllPractices);
+app.get('/api_1.0/Practice/GetByID/:practice_id', model.getPracticeByID);
+app.get('/api_1.0/Practice/GetAll', model.getAllPractices);
 //Practice Update APIs
 app.post('/api_1.0/Practice/Update', model.updatePractice);
 //Practice Delete APIs
