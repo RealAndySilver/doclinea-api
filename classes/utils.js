@@ -17,4 +17,8 @@ exports.isJson = function(str) {
         return false;
     }
     return true;
-}
+};
+
+exports.regexForString = function (string){
+	return { $regex: string, $options: 'i' };
+};

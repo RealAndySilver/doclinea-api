@@ -448,6 +448,12 @@ delete req.body.meters;
 if(req.body.lat && req.body.lon){
 	query.location = {$near :{$geometry :{type : "Point" ,coordinates :[req.body.lon, req.body.lat]},$maxDistance : meters}};	
 }
+if(query.name){
+	query.name = utils.regexForString(query.name);
+}
+if(query.lastname){
+	query.lastname = utils.regexForString(query.lastname);
+}
 delete query.lat;
 delete query.lon;
 console.log("Req: "+JSON.stringify(query));
