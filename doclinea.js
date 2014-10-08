@@ -94,10 +94,10 @@ app.post('/api_1.0/Doctor/Delete', model.deleteDoctor);
 //Hospital Create APIs
 app.post('/api_1.0/Hospital/Create', model.createHospital);
 //Hospital Get APIs
-app.get('/api_1.0/Hospital/GetByID/:id', model.getHospitalByID);
+app.get('/api_1.0/Hospital/GetByID/:hospital_id', model.getHospitalByID);
 app.get('/api_1.0/Hospital/GetAll', model.getAllHospitals);
 //Hospital Update APIs
-app.post('/api_1.0/Hospital/Update', model.updateHospital);
+app.post('/api_1.0/Hospital/Update/:hospital_id', model.updateHospital);
 //Hospital Delete APIs
 app.post('/api_1.0/Hospital/Delete', model.deleteHospital);
 ///////////////////////////////////////////////////////////////////

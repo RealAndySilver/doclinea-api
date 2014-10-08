@@ -345,17 +345,19 @@ exports.deleteUser = function(req,res){
 //Create
 exports.createDoctor = function(req,res){
 console.log("Req: "+JSON.stringify(req.body));
-var location = [];
+var location_list = [];
+var location = {};
 var coordinates = [];
 if(req.body.lat && req.body.lon){
 	coordinates.push(req.body.lon);
 	coordinates.push(req.body.lat);
-	location.push({address: req.body.address, name:req.body.location_name, loc:{type:'Point', coordinates: coordinates}});
+	location_list.push({location_address:req.body.location_address, location_name:req.body.location_name, lat:req.body.lat, lon:req.body.lon});
+	location = {loc:{type:'Point', coordinates: coordinates}};
 }
 else{
 	coordinates.push(0);
 	coordinates.push(0);
-	location.push({address: req.body.address, name:req.body.location_name, loc:{type:'Point', coordinates: coordinates}});
+	location = {loc:{type:'Point', coordinates: coordinates}};
 }
 if(req.body.localidad){
 	req.body.localidad = utils.isJson(req.body.localidad) ? JSON.parse(req.body.localidad): req.body.localidad ;
@@ -379,8 +381,8 @@ practice_list.push(req.body.practice_list);
 		localidad: req.body.localidad,
 		country : req.body.country,
 		practice_list : practice_list,
-		location_list : location,
-		location: location[0].loc
+		location_list : location_list,
+		location: location.loc
 	}).save(function(err,doctor){
 		if(err){
 		console.log("Err: "+err);
@@ -469,6 +471,9 @@ console.log("Req: "+JSON.stringify(query));
 exports.updateDoctor = function(req,res){
 req.body._id='';
 req.body.email = '';
+var location_list = [];
+var location = {};
+var coordinates = [];
 console.log("error: "+JSON.stringify(req.body));
 if(req.body.localidad){
 	req.body.localidad = utils.isJson(req.body.localidad) ? JSON.parse(req.body.localidad): req.body.localidad ;
@@ -476,7 +481,8 @@ if(req.body.localidad){
 if(req.body.lat && req.body.lon){
 	coordinates.push(req.body.lon);
 	coordinates.push(req.body.lat);
-	location.push({address: req.body.address, name:req.body.location_name, loc:{type:'Point', coordinates: coordinates}});
+	location_list.push({location_address:req.body.location_address, location_name:req.body.location_name, lat:req.body.lat, lon:req.body.lon});
+	location = {loc:{type:'Point', coordinates: coordinates}};
 }
 if(req.body.location_list){
 	req.body.location_list = utils.isJson(req.body.location_list) ? JSON.parse(req.body.location_list): req.body.location_list ;
@@ -574,7 +580,7 @@ exports.createHospital = function(req,res){
 };
 //Read One
 exports.getHospitalByID = function(req,res){
-	Hospital.findOne({_id:req.params.id},function(err,hospital){
+	Hospital.findOne({_id:req.params.hospital_id},function(err,hospital){
 		if(!hospital){
 			res.json({status: false, error: "not found"});
 		}
@@ -597,7 +603,7 @@ exports.getAllHospitals = function(req,res){
 //Update
 exports.updateHospital = function(req,res){
 var filtered_body = utils.remove_empty(req.body);
-	Hospital.findOneAndUpdate({_id:req.body.id},
+	Hospital.findOneAndUpdate({_id:req.params.hospital_id},
 	   {$set:filtered_body}, 
 	   	function(err,hospital){
 	   	if(!hospital){
