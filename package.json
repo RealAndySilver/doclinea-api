@@ -14,7 +14,8 @@
     "apn": "1.4.1",
     "stylus": "*",
     "knox": "*",
-    "node-gcm": "*"
+    "node-gcm": "*",
+    "bcrypt" : "*"
   },
   "devDependencies": {},
   "subdomain": "iccknet-EventosCaracol",

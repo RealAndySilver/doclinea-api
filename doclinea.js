@@ -7,7 +7,8 @@ var express = require('express')
   , model = require('./classes/model')
   , mail = require('./classes/mail_sender')
   , token = require('./classes/token')
-  , authentication = require('./classes/authentication');
+  , authentication = require('./classes/authentication')
+  ,	security = require('./classes/security');
 var app = express();
 // all environments
 
@@ -43,6 +44,10 @@ app.get('/*', function(req, res, next){
   res.setHeader('Last-Modified', (new Date()).toUTCString());
   next(); 
 });
+
+app.post('/api_1.0/User/Create', security.passwordEncrypt);
+app.post('/api_1.0/Doctor/Create', security.passwordEncrypt);
+
 //Verify
 //app.all('/api_1.0/*', authentication.verifyHeader);
 

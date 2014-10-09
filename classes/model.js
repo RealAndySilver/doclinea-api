@@ -7,12 +7,15 @@ mongoose.connect("mongodb://iAmUser:iAmStudio1@ds061199.mongolab.com:61199/docli
 var express = require('express');
 var knox = require('knox');
 var gcm = require('node-gcm');
-var exclude = {password:0};
+var	security = require('../classes/security');
+
+var exclude = {/*password:0*/};
 
 //SubDocumentSchema
 var TypeSchema = new mongoose.Schema({name:String, category:String});
 var ReasonSchema = new mongoose.Schema({reason:String});
 var Device = new mongoose.Schema({type:String, os:String, token:String, name:String}, {_id:false});
+var Education = new mongoose.Schema({institute_name:String, degree:String, year_start:String, year_end:String, hilights:String}, {_id:false});
 //Admin
 var AdminSchema= new mongoose.Schema({
 	name: {type: String, required: true,unique: false,},
@@ -69,7 +72,7 @@ var DoctorSchema= new mongoose.Schema({
 	location : {type: {type: String}, 'coordinates':{type:[Number]}},
 	hospital_list : {type: Array, required:false},
 	insurance_list : {type: Array, required:false},
-	education_list : {type: Array, required:false},
+	education_list : {type: [Education], required:false},
 	profesional_membership : {type: Array, required:false},
 	practice_list : {type: Array, required:false},
 	profile_pic : {type: Object, required:false},
@@ -294,31 +297,37 @@ exports.getUserByEmail = function(req,res){
 
 exports.authenticateUser = function(req,res){
 console.log("Req: "+JSON.stringify(req.body));
-	User.findOne({email:req.body.email, password: req.body.password},exclude,function(err,user){
+	User.findOne({email:req.body.email},exclude,function(err,user){
 		if(!user){
 			res.json({status: false, error: "not found"});
 		}
 		else{
-			//Acá se verifica si llega device info, y se agrega al device list del usuario
-			//En este punto ya se encuentra autenticado el usuario, las respuestas siempre serán positivas
-			if(req.body.device_info){
-				req.body.device_info = utils.isJson(req.body.device_info) ? JSON.parse(req.body.device_info): req.body.device_info ;
-				User.findOneAndUpdate({email:req.body.email}, {$addToSet:{devices:req.body.device_info}}, function(err,new_user){
-					if(!err){
-						if(!new_user){
-							res.json({status: true, response: user, message:"Autenticado correctamente, pero no se pudo agregar el dispositivo"});
+			//Verificamos que el hash guardado en password sea igual al password de entrada
+			if(security.compareHash(req.body.password, user.password)){
+				//Acá se verifica si llega device info, y se agrega al device list del usuario
+				//En este punto ya se encuentra autenticado el usuario, las respuestas siempre serán positivas
+				if(req.body.device_info){
+					req.body.device_info = utils.isJson(req.body.device_info) ? JSON.parse(req.body.device_info): req.body.device_info ;
+					User.findOneAndUpdate({email:req.body.email}, {$addToSet:{devices:req.body.device_info}}, function(err,new_user){
+						if(!err){
+							if(!new_user){
+								res.json({status: true, response: user, message:"Autenticado correctamente, pero no se pudo agregar el dispositivo"});
+							}
+							else{
+								res.json({status: true, response: new_user});
+							}
 						}
 						else{
-							res.json({status: true, response: new_user});
+								res.json({status: true, response: user, message:"Autenticado correctamente, pero ocurrió un error.", error:err});
 						}
-					}
-					else{
-							res.json({status: true, response: user, message:"Autenticado correctamente, pero ocurrió un error.", error:err});
-					}
-				});
+					});
+				}
+				else{
+					res.json({status: true, response: user});
+				}
 			}
 			else{
-				res.json({status: true, response: user});
+				res.json({status: false, error: "not found"});
 			}
 		}
 	});
@@ -511,6 +520,9 @@ console.log("error: "+JSON.stringify(req.body));
 if(req.body.localidad){
 	req.body.localidad = utils.isJson(req.body.localidad) ? JSON.parse(req.body.localidad): req.body.localidad ;
 }
+if(req.body.education_list){
+	req.body.education_list = utils.isJson(req.body.education_list) ? JSON.parse(req.body.education_list): req.body.education_list ;
+}
 if(req.body.location_list){
 	req.body.location_list = utils.isJson(req.body.location_list) ? JSON.parse(req.body.location_list): req.body.location_list ;
 }
@@ -554,12 +566,18 @@ console.log('Llega: '+JSON.stringify(req.files))
 
 exports.authenticateDoctor = function(req,res){
 console.log("Req: "+JSON.stringify(req.body));
-	Doctor.findOne({email:req.body.email, password: req.body.password},exclude,function(err,doctor){
+	Doctor.findOne({email:req.body.email},exclude,function(err,doctor){
 		if(!doctor){
 			res.json({status: false, error: "not found"});
 		}
 		else{
-			res.json({status: true, response: doctor});
+			//Verificamos que el hash guardado en password sea igual al password de entrada
+			if(security.compareHash(req.body.password, doctor.password)){
+				res.json({status: true, response: doctor});
+			}
+			else{
+				res.json({status: false, error: "not found"});
+			}
 		}
 	});
 };
