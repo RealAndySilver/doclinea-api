@@ -12,6 +12,7 @@ var exclude = {password:0};
 //SubDocumentSchema
 var TypeSchema = new mongoose.Schema({name:String, category:String});
 var ReasonSchema = new mongoose.Schema({reason:String});
+var Device = new mongoose.Schema({type:String, os:String, token:String, name:String}, {_id:false});
 //Admin
 var AdminSchema= new mongoose.Schema({
 	name: {type: String, required: true,unique: false,},
@@ -41,7 +42,7 @@ var UserSchema= new mongoose.Schema({
 	active_appointments : {type: Array, required:false},
 	completed_appointments : {type: Array, required:false},
 	canceled_appointments : {type: Array, required:false},
-	devices : {type: Object, required:false},
+	devices : {type: [Device], required:false},
 }),
 	User= mongoose.model('User',UserSchema);
 
@@ -249,6 +250,11 @@ exports.deleteAdmin = function(req,res){
 //////////////////////////////////
 //Create
 exports.createUser = function(req,res){
+var device_array = [];
+if(req.body.device_info){
+	req.body.device_info = utils.isJson(req.body.device_info) ? JSON.parse(req.body.device_info): req.body.device_info ;
+	device_array.push(req.body.device_info);
+}
 console.log("Req: "+JSON.stringify(req.body));
 	new User({
 		email : req.body.email,
@@ -263,6 +269,7 @@ console.log("Req: "+JSON.stringify(req.body));
 		insurance : req.body.insurance,
 		verified : false,
 		date_created: new Date(),
+		devices: device_array,
 	}).save(function(err,user){
 		if(err){
 			res.json(err);
@@ -292,7 +299,27 @@ console.log("Req: "+JSON.stringify(req.body));
 			res.json({status: false, error: "not found"});
 		}
 		else{
-			res.json({status: true, response: user});
+			//Acá se verifica si llega device info, y se agrega al device list del usuario
+			//En este punto ya se encuentra autenticado el usuario, las respuestas siempre serán positivas
+			if(req.body.device_info){
+				req.body.device_info = utils.isJson(req.body.device_info) ? JSON.parse(req.body.device_info): req.body.device_info ;
+				User.findOneAndUpdate({email:req.body.email}, {$addToSet:{devices:req.body.device_info}}, function(err,new_user){
+					if(!err){
+						if(!new_user){
+							res.json({status: true, response: user, message:"Autenticado correctamente, pero no se pudo agregar el dispositivo"});
+						}
+						else{
+							res.json({status: true, response: new_user});
+						}
+					}
+					else{
+							res.json({status: true, response: user, message:"Autenticado correctamente, pero ocurrió un error.", error:err});
+					}
+				});
+			}
+			else{
+				res.json({status: true, response: user});
+			}
 		}
 	});
 };
@@ -487,13 +514,14 @@ if(req.body.localidad){
 if(req.body.location_list){
 	req.body.location_list = utils.isJson(req.body.location_list) ? JSON.parse(req.body.location_list): req.body.location_list ;
 }
-if(req.body.location_list.lat && req.body.location_list.lon){
-	coordinates.push(req.body.location_list.lon);
-	coordinates.push(req.body.location_list.lat);
-	location_list.push({location_address:req.body.location_address, location_name:req.body.location_name, lat:req.body.lat, lon:req.body.lon});
-	req.body.location = {type:'Point', coordinates: coordinates};
-}
+
 if(req.body.location_list){
+	if(req.body.location_list.lat && req.body.location_list.lon){
+		coordinates.push(req.body.location_list.lon);
+		coordinates.push(req.body.location_list.lat);
+		location_list.push({location_address:req.body.location_address, location_name:req.body.location_name, lat:req.body.lat, lon:req.body.lon});
+		req.body.location = {type:'Point', coordinates: coordinates};
+	}
 	req.body.location_list = utils.isJson(req.body.location_list) ? JSON.parse(req.body.location_list): req.body.location_list ;
 }
 var filtered_body = utils.remove_empty(req.body);
