@@ -22,3 +22,7 @@ exports.isJson = function(str) {
 exports.regexForString = function (string){
 	return { $regex: string, $options: 'i' };
 };
+
+exports.log = function(service_name, request, json){
+	console.log(service_name.blue +" "+ request.green+" "+ json.cyan);	
+};

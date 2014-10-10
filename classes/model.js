@@ -8,6 +8,7 @@ var express = require('express');
 var knox = require('knox');
 var gcm = require('node-gcm');
 var	security = require('../classes/security');
+var colors = require('colors');
 
 var exclude = {/*password:0*/};
 
@@ -258,7 +259,7 @@ if(req.body.device_info){
 	req.body.device_info = utils.isJson(req.body.device_info) ? JSON.parse(req.body.device_info): req.body.device_info ;
 	device_array.push(req.body.device_info);
 }
-console.log("Req: "+JSON.stringify(req.body));
+utils.log("User/Create","Recibo:",JSON.stringify(req.body));
 	new User({
 		email : req.body.email,
 		password : req.body.password,
@@ -278,7 +279,7 @@ console.log("Req: "+JSON.stringify(req.body));
 			res.json(err);
 		}
 		else{
-			console.log("Listo: "+ {status: true, message: "Usuario creado exitosamente.", response: user});
+			utils.log("User/Create","Envío:",JSON.stringify(user));
 			res.json({status: true, message: "Usuario creado exitosamente.", response: user});
 		}
 	});
@@ -296,7 +297,7 @@ exports.getUserByEmail = function(req,res){
 };
 
 exports.authenticateUser = function(req,res){
-console.log("Req: "+JSON.stringify(req.body));
+utils.log("User/Authenticate","Recibo:",JSON.stringify(req.body));
 	User.findOne({email:req.body.email},exclude,function(err,user){
 		if(!user){
 			res.json({status: false, error: "not found"});
@@ -307,6 +308,7 @@ console.log("Req: "+JSON.stringify(req.body));
 				//Acá se verifica si llega device info, y se agrega al device list del usuario
 				//En este punto ya se encuentra autenticado el usuario, las respuestas siempre serán positivas
 				if(req.body.device_info){
+					utils.log("User/Authenticate","Envío:",JSON.stringify(user));
 					req.body.device_info = utils.isJson(req.body.device_info) ? JSON.parse(req.body.device_info): req.body.device_info ;
 					User.findOneAndUpdate({email:req.body.email}, {$addToSet:{devices:req.body.device_info}}, function(err,new_user){
 						if(!err){
@@ -334,7 +336,6 @@ console.log("Req: "+JSON.stringify(req.body));
 };
 //Read All
 exports.getAllUsers = function(req,res){
-console.log("Cabecera: "+JSON.stringify(req.headers));
 	User.find({},exclude,function(err,users){
 		if(err){
 			res.json({status: false, error: "not found"});
@@ -349,6 +350,7 @@ exports.updateUser = function(req,res){
 req.body._id = '';
 req.body.email = '';
 var filtered_body = utils.remove_empty(req.body);
+utils.log("User/Update","Recibo:",JSON.stringify(filtered_body));
 	User.findOneAndUpdate({_id:req.params.user_id},
 	   {$set:filtered_body}, 
 	   	function(err,user){
@@ -356,6 +358,7 @@ var filtered_body = utils.remove_empty(req.body);
 		   	res.json({status: false, error: "not found"});
 	   	}
 	   	else{
+	   		utils.log("User/Create","Envío:",JSON.stringify(user));
 		   	res.json({status:true, message:"Usuario actualizado exitosamente.", response:user});
 	   	}
 	});
@@ -380,7 +383,8 @@ exports.deleteUser = function(req,res){
 //////////////////////////////////
 //Create
 exports.createDoctor = function(req,res){
-console.log("Req: "+JSON.stringify(req.body));
+utils.log("Doctor/Create","Recibo:",JSON.stringify(req.body));
+
 var location_list = [];
 var location = {};
 var coordinates = [];
@@ -421,21 +425,22 @@ practice_list.push(req.body.practice_list);
 		location: location.loc
 	}).save(function(err,doctor){
 		if(err){
-		console.log("Err: "+err);
 			res.json(err);
 		}
 		else{
-			doctor.password = 'Protected';
+			utils.log("User/Create","Envío:",JSON.stringify(doctor));
 			res.json({status: true, message: "Doctor creado exitosamente.", response: doctor});
 		}
 	});
 };
 exports.addPicToGallery = function(req,res){
+utils.log("User/AddPicToGallery","Recibo:",JSON.stringify(req.body));
 	Doctor.findOne({_id:req.params.doctor_id},exclude,function(err,doctor){
 		if(!doctor){
 			res.json({status: false, error: "not found"});
 		}
 		else{
+			utils.log("User/AddPicToGallery","Envio:",JSON.stringify(doctor));
 			uploadImage(req.files.image,doctor,"gallery", 'doctor');
 			res.json({status: true, response: 'update in progress, get doctor again to see results'})
 		}
@@ -454,11 +459,13 @@ exports.getDoctorByEmail = function(req,res){
 	});
 };
 exports.getDoctorByID = function(req,res){
+utils.log("User/GetByID","Recibo:",JSON.stringify(req.body));
 	Doctor.findOne({_id:req.params.id},exclude,function(err,doctor){
 		if(!doctor){
 			res.json({status: false, error: "not found"});
 		}
 		else{
+			utils.log("User/GetByID","Envío:",JSON.stringify(doctor));
 			res.json({status: true, response: doctor});
 		}
 	});
@@ -477,6 +484,7 @@ exports.getAllDoctors = function(req,res){
 };
 exports.getDoctorsByParams = function(req,res){
 var filtered_body = utils.remove_empty(req.body);
+
 var query = {};
 query = req.body;
 var meters = parseInt(req.body.meters);
@@ -492,7 +500,7 @@ if(query.lastname){
 }
 delete query.lat;
 delete query.lon;
-console.log("Req: "+JSON.stringify(query));
+utils.log("User/GetByParams","Recibo:",JSON.stringify(query));
 	Doctor.find(query,
 		exclude,
 		function(err,doctors){
@@ -501,6 +509,7 @@ console.log("Req: "+JSON.stringify(query));
 				res.json({status: false, error: "not found"});
 			}
 			else{
+				utils.log("User/GetByParams","Envío:",JSON.stringify(doctors));
 				res.json({status: true, response: doctors});
 			}
 		}
@@ -516,7 +525,7 @@ req.body.email = '';
 var location_list = [];
 var location = {};
 var coordinates = [];
-console.log("error: "+JSON.stringify(req.body));
+
 if(req.body.localidad){
 	req.body.localidad = utils.isJson(req.body.localidad) ? JSON.parse(req.body.localidad): req.body.localidad ;
 }
@@ -537,27 +546,29 @@ if(req.body.location_list){
 	req.body.location_list = utils.isJson(req.body.location_list) ? JSON.parse(req.body.location_list): req.body.location_list ;
 }
 var filtered_body = utils.remove_empty(req.body);
-console.log("Req: "+ JSON.stringify(filtered_body));
+utils.log("Doctor/Update","Recibo:",JSON.stringify(filtered_body));
+
 	Doctor.findOneAndUpdate({_id:req.params.doctor_id},
 	   {$set:filtered_body},
 	   	function(err,doctor){
-	   	console.log("error: "+err);
 	   	if(!doctor){
 		   	res.json({status: false, error: "not found"});
 	   	}
 	   	else{
-	   		doctor.password = 'protected';
+	   		utils.log("Doctor/Update","Envío:",JSON.stringify(doctor));
 		   	res.json({status:true, message:"Doctor actualizado exitosamente.", response:doctor});
 	   	}
 	});
 };
 exports.updateProfilePic = function(req,res){
-console.log('Llega: '+JSON.stringify(req.files))
+utils.log("Doctor/UpdateProfilePic","Recibo:",JSON.stringify(req.files));
+
 	Doctor.findOne({_id:req.params.doctor_id},exclude,function(err,doctor){
 		if(!doctor){
 			res.json({status: false, error: "not found"});
 		}
 		else{
+			utils.log("Doctor/UpdateProfilePic","Envío:",JSON.stringify(doctor));
 			uploadImage(req.files.image,doctor,"profile", 'doctor');
 			res.json({status: true, response: 'update in progress, get doctor again to see results'})
 		}
@@ -565,7 +576,7 @@ console.log('Llega: '+JSON.stringify(req.files))
 };
 
 exports.authenticateDoctor = function(req,res){
-console.log("Req: "+JSON.stringify(req.body));
+utils.log("Doctor/Authenticate","Recibo:",JSON.stringify(req.body));
 	Doctor.findOne({email:req.body.email},exclude,function(err,doctor){
 		if(!doctor){
 			res.json({status: false, error: "not found"});
@@ -573,6 +584,7 @@ console.log("Req: "+JSON.stringify(req.body));
 		else{
 			//Verificamos que el hash guardado en password sea igual al password de entrada
 			if(security.compareHash(req.body.password, doctor.password)){
+				utils.log("Doctor/Authenticate","Envío:",JSON.stringify(doctor));
 				res.json({status: true, response: doctor});
 			}
 			else{
@@ -584,7 +596,7 @@ console.log("Req: "+JSON.stringify(req.body));
 
 //Delete
 exports.removeGalleryPic = function(req,res){
-console.log("Req: "+JSON.stringify(req.body));
+utils.log("Doctor/RemoveGalleryPic","Recibo:",JSON.stringify(req.body));
 
 	Doctor.findOneAndUpdate(
 	    {_id: req.params.doctor_id},
@@ -595,7 +607,7 @@ console.log("Req: "+JSON.stringify(req.body));
 		    	res.json({status:false, message: 'Error al borrar'});
 	    	}
 	    	else{
-	    		console.log("Borrado: "+JSON.stringify(doctor.gallery));
+				utils.log("Doctor/RemoveGalleryPic","Envío:",JSON.stringify(doctor));
 	        	res.json({status:true, message: 'Borrado' ,response:doctor});
 	    	}
 	    }

@@ -15,7 +15,8 @@
     "stylus": "*",
     "knox": "*",
     "node-gcm": "*",
-    "bcrypt" : "*"
+    "bcrypt" : "*",
+    "colors" : "*"
   },
   "devDependencies": {},
   "subdomain": "iccknet-EventosCaracol",
