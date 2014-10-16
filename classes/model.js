@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 var apn = require('apn');
 var send_push = require('../classes/push_sender');
 var utils = require('../classes/utils');
+var mail = require('../classes/mail_sender');
 var fs = require('fs');
 mongoose.connect("mongodb://iAmUser:iAmStudio1@ds061199.mongolab.com:61199/doclinea");
 var express = require('express');
@@ -30,6 +31,7 @@ var AdminSchema= new mongoose.Schema({
 var UserSchema= new mongoose.Schema({
 	email : {type: String, required:true, unique:true,},
 	password : {type: String, required:true},
+	password_recover : {status: {type: Boolean}, token:{type:String}},
 	name : {type: String, required:true},
 	lastname : {type: String, required:false},
 	gender : {type: String, required:false},
@@ -53,6 +55,7 @@ var UserSchema= new mongoose.Schema({
 var DoctorSchema= new mongoose.Schema({
 	name : {type: String, required:true},
 	password : {type: String, required:true},
+	password_recover : {status: {type: Boolean}, token:{type:String}},
 	lastname : {type: String, required:true},
 	email : {type: String, required:true, unique:true,},
 	gender : {type: String, required:true},
@@ -116,7 +119,7 @@ var ScheduleSchema= new mongoose.Schema({
 
 var HospitalSchema= new mongoose.Schema({
 	name : {type: String, required:false},
-	location : {type: Object, required:false},
+	location : {type: {type: String}, 'coordinates':{type:[Number]}},
 	address : {type: String, required:false},
 	logo : {type: String, required:false},
 }),
@@ -363,6 +366,95 @@ utils.log("User/Update","Recibo:",JSON.stringify(filtered_body));
 	   	}
 	});
 };
+//Password
+exports.requestRecoverUser = function(req,res){
+	utils.log("User/Recover","Recibo:",req.params.user_email);
+	User.findOne({email:req.params.user_email},function(err,user){
+		if(!user){
+			res.json({status: false, error: "not found"});
+		}
+		else{
+			var token = security.encrypt(user.email);
+			var tokenB64 = security.base64(token);
+			user.password_recover = {status:true, token:token};
+			user.save(function(err, result){
+				if(err){
+					res.json({status: false, error: err});
+				}
+				else{
+					if(result){
+						//mail.send("Token: "+token, doctor.email);
+						var hostname = req.headers.host;
+						var url = 'http://'+hostname+'/api_1.0/Password/Redirect/user/'+user.email+'/new_password/'+tokenB64;
+						//var url2= "doclinea://?token="+tokenB64+"&type=doctor&request=new_password";
+						mail.send("Recuperar Contraseña", 
+									"Hola "+user.name+". <br>Ingresa a este link para recuperar tu contraseña:<br> <a href='"+url+"'> Doclinea </a>", 
+									user.email);
+						res.json({status: true, response: {token:tokenB64}});
+					}
+				}
+			});
+		}
+	});
+};
+
+exports.newPasswordUser = function(req,res){
+	var token_decoded = security.decodeBase64(req.params.token);
+	utils.log("User/NewPassword","Recibo:",token_decoded);
+	User.findOne({password_recover:{status:true, token: token_decoded}},function(err,user){
+		if(!user){
+			res.json({status: false, error: "not found"});
+		}
+		else{
+			user.password_recover.status = false;
+			user.password_recover.token = "";
+			user.password = req.body.password;
+			user.save(function(err, result){
+				if(err){
+					
+				}
+				else{
+					if(result){
+						//mail.send("Clave Cambiada Con Exito");
+						mail.send("Clave Cambiada Con Exito!", "Hola "+user.name+". <br>Tu contraseña ha sido cambiada con éxito. Ingresa ya a Doclinea:<br> <a href='http://doclinea.com'> Doclinea </a>", user.email);
+						res.json({status: true, response: result});
+					}
+				}
+			});
+		}
+	});
+};
+
+exports.changePasswordUser = function(req,res){
+utils.log("User/ChangePassword","Recibo:",JSON.stringify(req.body));
+	User.findOne({_id:req.params.user_id},function(err,user){
+		if(!user){
+			res.json({status: false, error: "not found"});
+		}
+		else{
+			//Verificamos que el hash guardado en password sea igual al password de entrada
+			if(security.compareHash(req.body.password, user.password)){
+				//Acá se verifica si llega device info, y se agrega al device list del usuario
+				//En este punto ya se encuentra autenticado el usuario, las respuestas siempre serán positivas
+				user.password = security.encrypt(req.body.new_password);
+				user.save(function(err, result){
+					if(err){
+						utils.log("User/ChangePassword","Error:",JSON.stringify(err));
+						res.json({status: false, error: err, message: "Ocurrió un error al actualizar la contraseña."});
+					}
+					else{
+						utils.log("User/ChangePassword","Envío:",JSON.stringify(user));
+						res.json({status: true, response: user, message: "Contraseña actualizada exitosamente."});
+					}
+				});			
+			}
+			else{
+				res.json({status: false, error: "La contraseña es incorrecta."});
+			}
+		}
+	});
+};
+
 //Delete
 exports.deleteUser = function(req,res){
 	User.remove({email:req.body.email},function(err){
@@ -525,6 +617,7 @@ req.body.email = '';
 var location_list = [];
 var location = {};
 var coordinates = [];
+utils.log("Doctor/Update","Recibo:",JSON.stringify(req.body));
 
 if(req.body.localidad){
 	req.body.localidad = utils.isJson(req.body.localidad) ? JSON.parse(req.body.localidad): req.body.localidad ;
@@ -546,6 +639,9 @@ if(req.body.location_list){
 	req.body.location_list = utils.isJson(req.body.location_list) ? JSON.parse(req.body.location_list): req.body.location_list ;
 }
 var filtered_body = utils.remove_empty(req.body);
+if (req.body.education_list[0] == 0){
+	req.body.education_list = [];
+}
 utils.log("Doctor/Update","Recibo:",JSON.stringify(filtered_body));
 
 	Doctor.findOneAndUpdate({_id:req.params.doctor_id},
@@ -585,7 +681,11 @@ utils.log("Doctor/Authenticate","Recibo:",JSON.stringify(req.body));
 			//Verificamos que el hash guardado en password sea igual al password de entrada
 			if(security.compareHash(req.body.password, doctor.password)){
 				utils.log("Doctor/Authenticate","Envío:",JSON.stringify(doctor));
-				res.json({status: true, response: doctor});
+				doctor.password_recover.status = false;
+				doctor.password_recover.token = "";
+				doctor.save(function(err, result){
+					res.json({status: true, response: doctor});
+				});
 			}
 			else{
 				res.json({status: false, error: "not found"});
@@ -594,10 +694,96 @@ utils.log("Doctor/Authenticate","Recibo:",JSON.stringify(req.body));
 	});
 };
 
+exports.requestRecoverDoctor = function(req,res){
+	utils.log("Doctor/Recover","Recibo:",req.params.doctor_email);
+	Doctor.findOne({email:req.params.doctor_email},function(err,doctor){
+		if(!doctor){
+			res.json({status: false, error: "not found"});
+		}
+		else{
+			var token = security.encrypt(doctor.email);
+			var tokenB64 = security.base64(token);
+			doctor.password_recover = {status:true, token:token};
+			doctor.save(function(err, result){
+				if(err){
+					res.json({status: false, error: err});
+				}
+				else{
+					if(result){
+						//mail.send("Token: "+token, doctor.email);
+						var hostname = req.headers.host;
+						var url = 'http://'+hostname+'/api_1.0/Password/Redirect/doctor/'+doctor.email+'/new_password/'+tokenB64;
+						//var url2= "doclinea://?token="+tokenB64+"&type=doctor&request=new_password";
+						mail.send("Recuperar Contraseña", 
+									"Hola "+doctor.name+". <br>Ingresa a este link para recuperar tu contraseña:<br> <a href='"+url+"'> Doclinea </a>", 
+									doctor.email);
+						res.json({status: true, response: {token:tokenB64}});
+					}
+				}
+			});
+		}
+	});
+};
+
+exports.newPasswordDoctor = function(req,res){
+	var token_decoded = security.decodeBase64(req.params.token);
+	utils.log("Doctor/NewPassword","Recibo:",token_decoded);
+	Doctor.findOne({password_recover:{status:true, token: token_decoded}},function(err,doctor){
+		if(!doctor){
+			res.json({status: false, error: "not found"});
+		}
+		else{
+			doctor.password_recover.status = false;
+			doctor.password_recover.token = "";
+			doctor.password = req.body.password;
+			doctor.save(function(err, result){
+				if(err){
+					
+				}
+				else{
+					if(result){
+						//mail.send("Clave Cambiada Con Exito");
+						mail.send("Clave Cambiada Con Exito!", "Hola "+doctor.name+". <br>Tu contraseña ha sido cambiada con éxito. Ingresa ya a Doclinea:<br> <a href='http://doclinea.com'> Doclinea </a>", doctor.email);
+						res.json({status: true, response: result});
+					}
+				}
+			});
+		}
+	});
+};
+
+exports.changePasswordDoctor = function(req,res){
+utils.log("Doctor/ChangePassword","Recibo:",JSON.stringify(req.body));
+	Doctor.findOne({_id:req.params.doctor_id},function(err,doctor){
+		if(!doctor){
+			res.json({status: false, error: "not found"});
+		}
+		else{
+			//Verificamos que el hash guardado en password sea igual al password de entrada
+			if(security.compareHash(req.body.password, doctor.password)){
+				//Acá se verifica si llega device info, y se agrega al device list del usuario
+				//En este punto ya se encuentra autenticado el usuario, las respuestas siempre serán positivas
+				doctor.password = security.encrypt(req.body.new_password);
+				doctor.save(function(err, result){
+					if(err){
+						utils.log("Doctor/ChangePassword","Error:",JSON.stringify(err));
+						res.json({status: false, error: err, message: "Ocurrió un error al actualizar la contraseña."});
+					}
+					else{
+						utils.log("User/ChangePassword","Envío:",JSON.stringify(doctor));
+						res.json({status: true, response: doctor, message: "Contraseña actualizada exitosamente."});
+					}
+				});			
+			}
+			else{
+				res.json({status: false, error: "La contraseña es incorrecta."});
+			}
+		}
+	});
+};
 //Delete
 exports.removeGalleryPic = function(req,res){
-utils.log("Doctor/RemoveGalleryPic","Recibo:",JSON.stringify(req.body));
-
+	utils.log("Doctor/RemoveGalleryPic","Recibo:",JSON.stringify(req.body));
 	Doctor.findOneAndUpdate(
 	    {_id: req.params.doctor_id},
 	    {$pull: {gallery: {name:req.body.name}}},
@@ -632,9 +818,21 @@ exports.deleteDoctor = function(req,res){
 //////////////////////////////////
 //Create
 exports.createHospital = function(req,res){
+var location = {};
+var coordinates = [];
+if(req.body.lat && req.body.lon){
+	coordinates.push(req.body.lon);
+	coordinates.push(req.body.lat);
+	location = {type:'Point', coordinates: coordinates};
+}
+else{
+	coordinates.push(0);
+	coordinates.push(0);
+	location = {type:'Point', coordinates: coordinates};
+}
 	new Hospital({
 		name : req.body.name,
-		location : req.body.location,
+		location : location,
 		address : req.body.address,
 	}).save(function(err,hospital){
 		if(err){
@@ -1106,3 +1304,33 @@ var uploadImage = function(file,object,type,owner){
 	    console.log('no hay imagen');
     }
 }
+
+//Password Redirect
+exports.passwordRedirect = function (req, res){
+	var ua = req.headers['user-agent'],
+	    $ = {};
+	
+	if (/mobile/i.test(ua)){
+	
+	}
+	
+	if (/like Mac OS X/.test(ua)) {
+	    res.redirect('doclinea://?token='+req.params.token+'&type='+req.params.type+'&request='+req.params.request+'&email='+req.params.email);
+	}
+	
+	if (/Android/.test(ua)){
+	
+	}
+	
+	if (/webOS\//.test(ua)){
+		
+	}
+	
+	if (/(Intel|PPC) Mac OS X/.test(ua)){
+		res.redirect('http://google.com/?token='+req.params.token+'&type='+req.params.type+'&request='+req.params.request+'&email='+req.params.email);
+	}
+	
+	if (/Windows NT/.test(ua)){
+		
+	}
+};

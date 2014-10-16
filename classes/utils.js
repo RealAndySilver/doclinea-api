@@ -24,5 +24,5 @@ exports.regexForString = function (string){
 };
 
 exports.log = function(service_name, request, json){
-	console.log(service_name.blue +" "+ request.green+" "+ json.cyan);	
+	console.log(new Date().toISOString()+": "+service_name.blue +" "+ request.green+" "+ json.cyan);	
 };

@@ -6,7 +6,6 @@ var express = require('express')
   , path = require('path')
   , model = require('./classes/model')
   , mail = require('./classes/mail_sender')
-  , token = require('./classes/token')
   , authentication = require('./classes/authentication')
   ,	security = require('./classes/security');
 var app = express();
@@ -45,8 +44,16 @@ app.get('/*', function(req, res, next){
   next(); 
 });
 
+//Middleware to encode password
 app.post('/api_1.0/User/Create', security.passwordEncrypt);
 app.post('/api_1.0/Doctor/Create', security.passwordEncrypt);
+app.post('/api_1.0/Doctor/NewPassword/*', security.passwordEncrypt);
+app.post('/api_1.0/User/NewPassword/*', security.passwordEncrypt);
+
+//////////////////////////////
+
+
+app.get('/api_1.0/Password/Redirect/:type/:email/:request/:token', model.passwordRedirect);
 
 //Verify
 //app.all('/api_1.0/*', authentication.verifyHeader);
@@ -67,6 +74,12 @@ app.post('/api_1.0/User/Authenticate', model.authenticateUser);
 app.post('/api_1.0/User/Update/:user_id', model.updateUser);
 //User Delete APIs
 app.post('/api_1.0/User/Delete', model.deleteUser);
+//Change Password
+app.post('/api_1.0/User/ChangePassword/:user_id', model.changePasswordUser);
+//User Recover Password
+app.get('/api_1.0/User/Recover/:user_email', model.requestRecoverUser);
+app.post('/api_1.0/User/NewPassword/:token', model.newPasswordUser);
+
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
@@ -89,6 +102,12 @@ app.post('/api_1.0/Doctor/UpdateProfilePic/:doctor_id', model.updateProfilePic);
 //Doctor Delete APIs
 app.post('/api_1.0/Doctor/RemoveGalleryPic/:doctor_id', model.removeGalleryPic);
 app.post('/api_1.0/Doctor/Delete', model.deleteDoctor);
+//Doctor Recover Password
+app.get('/api_1.0/Doctor/Recover/:doctor_email', model.requestRecoverDoctor);
+app.post('/api_1.0/Doctor/NewPassword/:token', model.newPasswordDoctor);
+//Change Password
+app.post('/api_1.0/Doctor/ChangePassword/:doctor_id', model.changePasswordDoctor);
+
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
