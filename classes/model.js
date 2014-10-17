@@ -639,8 +639,10 @@ if(req.body.location_list){
 	req.body.location_list = utils.isJson(req.body.location_list) ? JSON.parse(req.body.location_list): req.body.location_list ;
 }
 var filtered_body = utils.remove_empty(req.body);
-if (req.body.education_list[0] == 0){
-	req.body.education_list = [];
+if (req.body.education_list){
+	if(req.body.education_list[0] == 0){
+		req.body.education_list = [];
+	}
 }
 utils.log("Doctor/Update","Recibo:",JSON.stringify(filtered_body));
 
