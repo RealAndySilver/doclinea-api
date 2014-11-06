@@ -32,7 +32,7 @@ var TypeSchema = new mongoose.Schema({name:String, category:String});
 var ReasonSchema = new mongoose.Schema({reason:String});
 var Device = new mongoose.Schema({type:String, os:String, token:String, name:String}, {_id:false});
 var Education = new mongoose.Schema({institute_name:String, degree:String, year_start:String, year_end:String, hilights:String}, {_id:false});
-var UserSettings = new mongoose.Schema({email_appointment_notifications:Boolean, email_marketing_notifications:Boolean, mobile_appointment_notifications:Boolean, mobile_marketing_notifications:Boolean}, {_id:false});
+var Settings = new mongoose.Schema({email_appointment_notifications:Boolean, email_marketing_notifications:Boolean, mobile_appointment_notifications:Boolean, mobile_marketing_notifications:Boolean}, {_id:false});
 
 //////////////////////////////////
 //End SubDocumentSchema///////////
@@ -77,7 +77,7 @@ var UserSchema= new mongoose.Schema({
 	completed_appointments : {type: Array, required:false},
 	canceled_appointments : {type: Array, required:false},
 	devices : {type: [Device], required:false},
-	settings: {type: [UserSettings], required:false},
+	settings: {type: [Settings], required:false},
 }),
 	User= mongoose.model('User',UserSchema);
 //////////////////////////////////
@@ -120,6 +120,7 @@ var DoctorSchema= new mongoose.Schema({
 	review_list : {type: Array, required:false},
 	description : {type: String, required:false},
 	language_list : {type: Array, required:false},
+	settings: {type: [Settings], required:false},
 });
 	DoctorSchema.index({location:"2dsphere", required:false})
 	Doctor= mongoose.model('Doctor',DoctorSchema);
