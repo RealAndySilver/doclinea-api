@@ -1,3 +1,6 @@
+//////////////////////////////////
+//Dependencies////////////////////
+//////////////////////////////////
 var mongoose = require('mongoose');
 var apn = require('apn');
 var send_push = require('../classes/push_sender');
@@ -10,15 +13,32 @@ var knox = require('knox');
 var gcm = require('node-gcm');
 var	security = require('../classes/security');
 var colors = require('colors');
+//////////////////////////////////
+//End of Dependencies/////////////
+//////////////////////////////////
 
+//////////////////////////////////
+//Global Vars/////////////////////
+//////////////////////////////////
 var exclude = {/*password:0*/};
+//////////////////////////////////
+//End of Global Vars//////////////
+//////////////////////////////////
 
-//SubDocumentSchema
+//////////////////////////////////
+//SubDocumentSchema///////////////
+//////////////////////////////////
 var TypeSchema = new mongoose.Schema({name:String, category:String});
 var ReasonSchema = new mongoose.Schema({reason:String});
 var Device = new mongoose.Schema({type:String, os:String, token:String, name:String}, {_id:false});
 var Education = new mongoose.Schema({institute_name:String, degree:String, year_start:String, year_end:String, hilights:String}, {_id:false});
-//Admin
+//////////////////////////////////
+//End SubDocumentSchema///////////
+//////////////////////////////////
+
+//////////////////////////////////
+//Admin Schema////////////////////
+//////////////////////////////////
 var AdminSchema= new mongoose.Schema({
 	name: {type: String, required: true,unique: false,},
 	email: {type: String, required: true,unique: true,},
@@ -27,7 +47,13 @@ var AdminSchema= new mongoose.Schema({
 	role:{type: String, required: true,unique: false,},
 }),
 	Admin= mongoose.model('Admin',AdminSchema);
+//////////////////////////////////
+//End of Admin Schema/////////////
+//////////////////////////////////
 
+//////////////////////////////////
+//User Schema/////////////////////
+//////////////////////////////////
 var UserSchema= new mongoose.Schema({
 	email : {type: String, required:true, unique:true,},
 	password : {type: String, required:true},
@@ -51,7 +77,13 @@ var UserSchema= new mongoose.Schema({
 	devices : {type: [Device], required:false},
 }),
 	User= mongoose.model('User',UserSchema);
+//////////////////////////////////
+//End of User Schema//////////////
+//////////////////////////////////
 
+//////////////////////////////////
+//Doctor Schema///////////////////
+//////////////////////////////////
 var DoctorSchema= new mongoose.Schema({
 	name : {type: String, required:true},
 	password : {type: String, required:true},
@@ -88,7 +120,13 @@ var DoctorSchema= new mongoose.Schema({
 });
 	DoctorSchema.index({location:"2dsphere", required:false})
 	Doctor= mongoose.model('Doctor',DoctorSchema);
+//////////////////////////////////
+//End of Doctor Schema////////////
+//////////////////////////////////
 
+//////////////////////////////////
+//Appointment Schema//////////////
+//////////////////////////////////
 var AppointmentSchema= new mongoose.Schema({
 	user_id : {type: String, required:true},
 	doctor_id : {type: String, required:true},
@@ -101,7 +139,13 @@ var AppointmentSchema= new mongoose.Schema({
 	location : {type: Object, required:true},
 }),
 	Appointment= mongoose.model('Appointment',AppointmentSchema);
+//////////////////////////////////
+//End of Appointment  Schema//////
+//////////////////////////////////
 
+//////////////////////////////////
+//Schedule Schema/////////////////
+//////////////////////////////////
 var ScheduleSchema= new mongoose.Schema({
 	doctor_id : {type: String, required:true},
 	date_created : {type: Date, required:true},
@@ -116,7 +160,13 @@ var ScheduleSchema= new mongoose.Schema({
 	sunday : {type: Array, required:false},
 }),
 	Schedule= mongoose.model('Schedule',ScheduleSchema);
+//////////////////////////////////
+//End of Schedule Schema//////////
+//////////////////////////////////
 
+//////////////////////////////////
+//Hospital Schema/////////////////
+//////////////////////////////////
 var HospitalSchema= new mongoose.Schema({
 	name : {type: String, required:false},
 	location : {type: {type: String}, 'coordinates':{type:[Number]}},
@@ -124,27 +174,51 @@ var HospitalSchema= new mongoose.Schema({
 	logo : {type: String, required:false},
 }),
 	Hospital= mongoose.model('Hospital',HospitalSchema);
+//////////////////////////////////
+//End of Hospital Schema//////////
+//////////////////////////////////
 
+//////////////////////////////////
+//Practice Schema/////////////////
+//////////////////////////////////
 var PracticeSchema= new mongoose.Schema({
 	name : {type: String, required:false, unique: true},
 	type : {type: String, required:false},
 	reason_list : {type: [ReasonSchema], required:false},
 }),
 	Practice= mongoose.model('Practice',PracticeSchema);
+//////////////////////////////////
+//End of Practice Schema//////////
+//////////////////////////////////
 
+//////////////////////////////////
+//Insurance Schema////////////////
+//////////////////////////////////
 var InsuranceCompanySchema= new mongoose.Schema({
 	name : {type: String, required:false, unique: true},
 	logo : {type: String, required:false},
 	type_list: {type: [TypeSchema], required:false},
 }),
 	InsuranceCompany= mongoose.model('InsuranceCompany',InsuranceCompanySchema);
+//////////////////////////////////
+//End of Insurance Schema/////////
+//////////////////////////////////
 
+//////////////////////////////////
+//Insurance Type Schema///////////
+//////////////////////////////////
 var InsuranceTypeSchema= new mongoose.Schema({
 	company_id : {type: String, required:false},
 	name : {type: String, required:true},
 }),
 	InsuranceType= mongoose.model('InsuranceType',InsuranceTypeSchema);
+//////////////////////////////////
+//End of Insurance Type Schema////
+//////////////////////////////////
 
+//////////////////////////////////
+//Review Schema///////////////////
+//////////////////////////////////
 var ReviewSchema= new mongoose.Schema({
 	user_id : {type: String, required:true},
 	doctor_id : {type: String, required:true},
@@ -155,7 +229,13 @@ var ReviewSchema= new mongoose.Schema({
 	date_created : {type: Date, required:true},
 }),
 	Review= mongoose.model('Review',ReviewSchema);
+//////////////////////////////////
+//End of Review Schema////////////
+//////////////////////////////////
 
+//////////////////////////////////
+//Image Schema////////////////////
+//////////////////////////////////
 var ImageSchema= new mongoose.Schema({
 	name:{type: String, required: false,unique: false,},
 	owner: {type: String, required: false,unique: false,}, //user, doctor, insurance
@@ -165,6 +245,9 @@ var ImageSchema= new mongoose.Schema({
 	url:{type: String, required: false,unique: false,},
 }),
 	Image= mongoose.model('Image',ImageSchema);
+//////////////////////////////////
+//End of Image Schema/////////////
+//////////////////////////////////
 
 //Development AMAZON BUCKET
 var client = knox.createClient({
@@ -298,7 +381,6 @@ exports.getUserByEmail = function(req,res){
 		}
 	});
 };
-
 exports.authenticateUser = function(req,res){
 utils.log("User/Authenticate","Recibo:",JSON.stringify(req.body));
 	User.findOne({email:req.body.email},exclude,function(err,user){
@@ -397,7 +479,6 @@ exports.requestRecoverUser = function(req,res){
 		}
 	});
 };
-
 exports.newPasswordUser = function(req,res){
 	var token_decoded = security.decodeBase64(req.params.token);
 	utils.log("User/NewPassword","Recibo:",token_decoded);
@@ -424,7 +505,6 @@ exports.newPasswordUser = function(req,res){
 		}
 	});
 };
-
 exports.changePasswordUser = function(req,res){
 utils.log("User/ChangePassword","Recibo:",JSON.stringify(req.body));
 	User.findOne({_id:req.params.user_id},function(err,user){
@@ -454,7 +534,6 @@ utils.log("User/ChangePassword","Recibo:",JSON.stringify(req.body));
 		}
 	});
 };
-
 //Delete
 exports.deleteUser = function(req,res){
 	User.remove({email:req.body.email},function(err){
@@ -538,7 +617,6 @@ utils.log("User/AddPicToGallery","Recibo:",JSON.stringify(req.body));
 		}
 	});
 };
-
 //Read One
 exports.getDoctorByEmail = function(req,res){
 	Doctor.findOne({email:req.params.email},exclude,function(err,doctor){
@@ -562,7 +640,6 @@ utils.log("User/GetByID","Recibo:",JSON.stringify(req.body));
 		}
 	});
 };
-
 //Read All
 exports.getAllDoctors = function(req,res){
 	Doctor.find({},exclude,function(err,doctors){
@@ -617,7 +694,7 @@ req.body.email = '';
 var location_list = [];
 var location = {};
 var coordinates = [];
-utils.log("Doctor/Update","Recibo:",JSON.stringify(req.body));
+//utils.log("Doctor/Update","Recibo:",JSON.stringify(req.body));
 
 if(req.body.localidad){
 	req.body.localidad = utils.isJson(req.body.localidad) ? JSON.parse(req.body.localidad): req.body.localidad ;
@@ -672,7 +749,6 @@ utils.log("Doctor/UpdateProfilePic","Recibo:",JSON.stringify(req.files));
 		}
 	});
 };
-
 exports.authenticateDoctor = function(req,res){
 utils.log("Doctor/Authenticate","Recibo:",JSON.stringify(req.body));
 	Doctor.findOne({email:req.body.email},exclude,function(err,doctor){
@@ -695,7 +771,7 @@ utils.log("Doctor/Authenticate","Recibo:",JSON.stringify(req.body));
 		}
 	});
 };
-
+//Password
 exports.requestRecoverDoctor = function(req,res){
 	utils.log("Doctor/Recover","Recibo:",req.params.doctor_email);
 	Doctor.findOne({email:req.params.doctor_email},function(err,doctor){
@@ -726,7 +802,6 @@ exports.requestRecoverDoctor = function(req,res){
 		}
 	});
 };
-
 exports.newPasswordDoctor = function(req,res){
 	var token_decoded = security.decodeBase64(req.params.token);
 	utils.log("Doctor/NewPassword","Recibo:",token_decoded);
@@ -753,7 +828,6 @@ exports.newPasswordDoctor = function(req,res){
 		}
 	});
 };
-
 exports.changePasswordDoctor = function(req,res){
 utils.log("Doctor/ChangePassword","Recibo:",JSON.stringify(req.body));
 	Doctor.findOne({_id:req.params.doctor_id},function(err,doctor){
@@ -999,7 +1073,7 @@ exports.deleteInsuranceCompany = function(req,res){
 //////////////////////////////////
 
 //////////////////////////////////////
-//Practice CRUD starts here///
+//Practice CRUD starts here///////////
 //////////////////////////////////////
 //Create
 exports.createPractice = function(req,res){
@@ -1101,8 +1175,9 @@ exports.deletePractice = function(req,res){
 //End of InsuranceCompany CRUD////
 //////////////////////////////////
 
-
-
+//////////////////////////////////
+//Send Push Notification//////////
+//////////////////////////////////
 exports.sendPush = function (req,res){
 var android = req.body.android ? true:false;
 var ios = req.body.ios ? true:false;
@@ -1230,12 +1305,13 @@ var ios = req.body.ios ? true:false;
 		}
 	});
 };
-
+//////////////////////////////////
+//End of Send Push Notification///
+//////////////////////////////////
 
 /////////////////////////////////
 //Functions//////////////////////
 /////////////////////////////////
-
 var uploadImage = function(file,object,type,owner){
 	if(!file){
 		object.profile_pic = {name:"", image_url: ""};
@@ -1306,8 +1382,13 @@ var uploadImage = function(file,object,type,owner){
 	    console.log('no hay imagen');
     }
 }
+/////////////////////////////////
+//End of Functions///////////////
+/////////////////////////////////
 
-//Password Redirect
+/////////////////////////////////
+//Password Redirect//////////////
+/////////////////////////////////
 exports.passwordRedirect = function (req, res){
 	var ua = req.headers['user-agent'],
 	    $ = {};
@@ -1329,10 +1410,13 @@ exports.passwordRedirect = function (req, res){
 	}
 	
 	if (/(Intel|PPC) Mac OS X/.test(ua)){
-		res.redirect('http://google.com/?token='+req.params.token+'&type='+req.params.type+'&request='+req.params.request+'&email='+req.params.email);
+		res.redirect('http://localhost:3000/#/NewPassword/'+req.params.token+'/'+req.params.type+'/'+req.params.request+'/'+req.params.email);
 	}
 	
 	if (/Windows NT/.test(ua)){
 		
 	}
 };
+/////////////////////////////////
+//End of Password Redirect///////
+/////////////////////////////////
