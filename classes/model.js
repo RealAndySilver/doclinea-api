@@ -385,6 +385,16 @@ exports.getUserByEmail = function(req,res){
 		}
 	});
 };
+exports.getUserByID = function(req,res){
+	User.findOne({_id:req.params.id},exclude,function(err,user){
+		if(!user){
+			res.json({status: false, error: "not found"});
+		}
+		else{
+			res.json({status: true, response: user});
+		}
+	});
+};
 exports.authenticateUser = function(req,res){
 utils.log("User/Authenticate","Recibo:",JSON.stringify(req.body));
 	User.findOne({email:req.body.email},exclude,function(err,user){

@@ -68,6 +68,7 @@ app.get('/api_1.0/Password/Redirect/:type/:email/:request/:token', model.passwor
 app.post('/api_1.0/User/Create', model.createUser);
 //User Read APIs
 app.get('/api_1.0/User/GetByEmail/:email', model.getUserByEmail);
+app.get('/api_1.0/User/GetByID/:id', model.getUserByID);
 app.get('/api_1.0/User/GetAll', model.getAllUsers);
 app.post('/api_1.0/User/Authenticate', model.authenticateUser);
 //User Update APIs
