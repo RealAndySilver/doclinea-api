@@ -77,7 +77,7 @@ var UserSchema= new mongoose.Schema({
 	completed_appointments : {type: Array, required:false},
 	canceled_appointments : {type: Array, required:false},
 	devices : {type: [Device], required:false},
-	settings: {type: [Settings], required:false},
+	settings: {email_appointment_notifications:Boolean, email_marketing_notifications:Boolean, mobile_appointment_notifications:Boolean, mobile_marketing_notifications:Boolean},
 }),
 	User= mongoose.model('User',UserSchema);
 //////////////////////////////////
@@ -120,7 +120,7 @@ var DoctorSchema= new mongoose.Schema({
 	review_list : {type: Array, required:false},
 	description : {type: String, required:false},
 	language_list : {type: Array, required:false},
-	settings: {type: [Settings], required:false},
+	settings: {email_appointment_notifications:Boolean, email_marketing_notifications:Boolean, mobile_appointment_notifications:Boolean, mobile_marketing_notifications:Boolean},
 });
 	DoctorSchema.index({location:"2dsphere", required:false})
 	Doctor= mongoose.model('Doctor',DoctorSchema);
