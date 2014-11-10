@@ -446,8 +446,12 @@ exports.getAllUsers = function(req,res){
 };
 //Update
 exports.updateUser = function(req,res){
+utils.log("User/Update","Recibo sin filtro:",JSON.stringify(req.body));
 req.body._id = '';
 req.body.email = '';
+if(req.body.settings){
+	req.body.settings = utils.isJson(req.body.settings) ? JSON.parse(req.body.settings): req.body.settings ;
+}
 var filtered_body = utils.remove_empty(req.body);
 utils.log("User/Update","Recibo:",JSON.stringify(filtered_body));
 	User.findOneAndUpdate({_id:req.params.user_id},
@@ -709,7 +713,9 @@ var location_list = [];
 var location = {};
 var coordinates = [];
 //utils.log("Doctor/Update","Recibo:",JSON.stringify(req.body));
-
+if(req.body.settings){
+	req.body.settings = utils.isJson(req.body.settings) ? JSON.parse(req.body.settings): req.body.settings ;
+}
 if(req.body.localidad){
 	req.body.localidad = utils.isJson(req.body.localidad) ? JSON.parse(req.body.localidad): req.body.localidad ;
 }
