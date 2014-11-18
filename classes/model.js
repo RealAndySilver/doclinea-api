@@ -952,7 +952,7 @@ exports.getHospitalByID = function(req,res){
 };
 //Read All
 exports.getAllHospitals = function(req,res){
-	User.find({},function(err,hospitals){
+	Hospital.find({},function(err,hospitals){
 		if(err){
 			res.json({status: false, error: "not found"});
 		}
@@ -1192,7 +1192,7 @@ exports.deletePractice = function(req,res){
 	});
 };
 //////////////////////////////////
-//End of InsuranceCompany CRUD////
+//End of Practice CRUD////
 //////////////////////////////////
 
 //////////////////////////////////
