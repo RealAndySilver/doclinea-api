@@ -172,10 +172,12 @@ var ScheduleSchema= new mongoose.Schema({
 //Hospital Schema/////////////////
 //////////////////////////////////
 var HospitalSchema= new mongoose.Schema({
+	email : {type: String, required:true, unique:true,},
 	name : {type: String, required:false},
+	location_list : {type: Array, required:false},
 	location : {type: {type: String}, 'coordinates':{type:[Number]}},
-	address : {type: String, required:false},
-	logo : {type: String, required:false},
+	city : {type: String, required:false},
+	logo : {type: Object, required:false},
 }),
 	Hospital= mongoose.model('Hospital',HospitalSchema);
 //////////////////////////////////
@@ -199,9 +201,10 @@ var PracticeSchema= new mongoose.Schema({
 //Insurance Schema////////////////
 //////////////////////////////////
 var InsuranceCompanySchema= new mongoose.Schema({
-	name : {type: String, required:false, unique: true},
+	name : {type: String, required:true, unique: true},
+	email : {type: String, required:true, unique: true},
 	logo : {type: String, required:false},
-	type_list: {type: [TypeSchema], required:false},
+	type_list: {type: [TypeSchema]},
 }),
 	InsuranceCompany= mongoose.model('InsuranceCompany',InsuranceCompanySchema);
 //////////////////////////////////
@@ -930,6 +933,7 @@ else{
 		name : req.body.name,
 		location : location,
 		address : req.body.address,
+		email: req.body.email,
 	}).save(function(err,hospital){
 		if(err){
 			res.json(err);
@@ -963,7 +967,16 @@ exports.getAllHospitals = function(req,res){
 };
 //Update
 exports.updateHospital = function(req,res){
-var filtered_body = utils.remove_empty(req.body);
+	if(req.body.location_list){
+		if(req.body.location_list.lat && req.body.location_list.lon){
+			coordinates.push(req.body.location_list.lon);
+			coordinates.push(req.body.location_list.lat);
+			location_list.push({location_address:req.body.location_address, location_name:req.body.location_name, lat:req.body.lat, lon:req.body.lon});
+			req.body.location = {type:'Point', coordinates: coordinates};
+		}
+		req.body.location_list = utils.isJson(req.body.location_list) ? JSON.parse(req.body.location_list): req.body.location_list ;
+	}
+	var filtered_body = utils.remove_empty(req.body);
 	Hospital.findOneAndUpdate({_id:req.params.hospital_id},
 	   {$set:filtered_body}, 
 	   	function(err,hospital){
@@ -973,6 +986,19 @@ var filtered_body = utils.remove_empty(req.body);
 	   	else{
 		   	res.json({status:true, message:"Hospital actualizado exitosamente."});
 	   	}
+	});
+};
+exports.updateHospitalPic = function(req,res){
+utils.log("Hospital/UpdatePic","Recibo:",JSON.stringify(req.files));
+	Hospital.findOne({_id:req.params.hospital_id},exclude,function(err,hospital){
+		if(!hospital){
+			res.json({status: false, error: "not found"});
+		}
+		else{
+			utils.log("Hospital/UpdatePic","Envío:",JSON.stringify(hospital));
+			uploadImage(req.files.image,hospital,"profile", 'hospital');
+			res.json({status: true, response: 'update in progress, get doctor again to see results'})
+		}
 	});
 };
 //Delete
@@ -995,11 +1021,13 @@ exports.deleteHospital = function(req,res){
 //////////////////////////////////////
 //Create
 exports.createInsuranceCompany = function(req,res){
+utils.log("InsuranceCompany/Create","Recibo:",JSON.stringify(req.body));
 	new InsuranceCompany({
 		name : req.body.name,
+		email : req.body.email,
 	}).save(function(err,insurancecompany){
 		if(err){
-			res.json({status: false, error: "Error. no se pudo crear la compañía de seguros"});
+			res.json({status: false, error: "Error. no se pudo crear la compañía de seguros", error:err});
 		}
 		else{
 			res.json({status: true, message: "Compañía de seguros creada exitosamente.", response:insurancecompany});
@@ -1335,7 +1363,7 @@ var ios = req.body.ios ? true:false;
 var uploadImage = function(file,object,type,owner){
 	if(!file){
 		object.profile_pic = {name:"", image_url: ""};
-		object.save(function(err,doctor){
+		object.save(function(err,obj){
 		});
 		console.log('No hay archivo');
 		return;
