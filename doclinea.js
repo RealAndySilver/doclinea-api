@@ -123,6 +123,7 @@ app.get('/api_1.0/Hospital/GetByID/:hospital_id', model.getHospitalByID);
 app.get('/api_1.0/Hospital/GetAll', model.getAllHospitals);
 //Hospital Update APIs
 app.post('/api_1.0/Hospital/Update/:hospital_id', model.updateHospital);
+app.post('/api_1.0/Hospital/UpdatePic/:hospital_id', model.updateHospitalPic);
 //Hospital Delete APIs
 app.post('/api_1.0/Hospital/Delete', model.deleteHospital);
 ///////////////////////////////////////////////////////////////////
@@ -140,6 +141,7 @@ app.get('/api_1.0/InsuranceCompany/GetByID/:id', model.getInsuranceCompanyByID);
 app.get('/api_1.0/InsuranceCompany/GetAll', model.getAllInsuranceCompanies);
 //InsuranceCompany Update APIs
 app.post('/api_1.0/InsuranceCompany/Update', model.updateInsuranceCompany);
+app.post('/api_1.0/InsuranceCompany/UpdatePic/:insurancecompany_id', model.updateInsuranceCompanyPic);
 //InsuranceCompany Delete APIs
 app.post('/api_1.0/InsuranceCompany/RemoveInsuranceType/:id', model.removeInsuranceType);
 app.post('/api_1.0/InsuranceCompany/Delete', model.deleteInsuranceCompany);

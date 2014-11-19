@@ -1090,6 +1090,19 @@ var filtered_body = utils.remove_empty(req.body);
 	   	}
 	});
 };
+exports.updateInsuranceCompanyPic = function(req,res){
+utils.log("InsuranceCompany/UpdatePic","Recibo:",JSON.stringify(req.files));
+	InsuranceCompany.findOne({_id:req.params.insurancecompany_id},exclude,function(err,insurancecompany){
+		if(!insurancecompany){
+			res.json({status: false, error: "not found"});
+		}
+		else{
+			utils.log("InsuranceCompany/UpdatePic","Envío:",JSON.stringify(insurancecompany));
+			uploadImage(req.files.image,insurancecompany,"profile", 'insurancecompany');
+			res.json({status: true, response: 'update in progress, get doctor again to see results'})
+		}
+	});
+};
 //Delete
 exports.removeInsuranceType = function(req,res){
 	InsuranceCompany.findOneAndUpdate(
