@@ -140,7 +140,7 @@ app.post('/api_1.0/InsuranceCompany/AddInsuranceType/:insuranceCompanyID', model
 app.get('/api_1.0/InsuranceCompany/GetByID/:id', model.getInsuranceCompanyByID);
 app.get('/api_1.0/InsuranceCompany/GetAll', model.getAllInsuranceCompanies);
 //InsuranceCompany Update APIs
-app.post('/api_1.0/InsuranceCompany/Update', model.updateInsuranceCompany);
+app.post('/api_1.0/InsuranceCompany/Update/:id', model.updateInsuranceCompany);
 app.post('/api_1.0/InsuranceCompany/UpdatePic/:insurancecompany_id', model.updateInsuranceCompanyPic);
 //InsuranceCompany Delete APIs
 app.post('/api_1.0/InsuranceCompany/RemoveInsuranceType/:id', model.removeInsuranceType);

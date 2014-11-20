@@ -1079,7 +1079,7 @@ exports.getAllInsuranceCompanies = function(req,res){
 //Update
 exports.updateInsuranceCompany = function(req,res){
 var filtered_body = utils.remove_empty(req.body);
-	InsuranceCompany.findOneAndUpdate({_id:req.body.id},
+	InsuranceCompany.findOneAndUpdate({_id:req.params.id},
 	   {$set:filtered_body}, 
 	   	function(err,insurancecompany){
 	   	if(!insurancecompany){
