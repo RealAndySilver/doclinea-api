@@ -137,10 +137,10 @@ app.post('/api_1.0/Hospital/Delete', model.deleteHospital);
 app.post('/api_1.0/InsuranceCompany/Create', model.createInsuranceCompany);
 app.post('/api_1.0/InsuranceCompany/AddInsuranceType/:insuranceCompanyID', model.addInsurancetype);
 //InsuranceCompany Get APIs
-app.get('/api_1.0/InsuranceCompany/GetByID/:id', model.getInsuranceCompanyByID);
+app.get('/api_1.0/InsuranceCompany/GetByID/:insurancecompany_id', model.getInsuranceCompanyByID);
 app.get('/api_1.0/InsuranceCompany/GetAll', model.getAllInsuranceCompanies);
 //InsuranceCompany Update APIs
-app.post('/api_1.0/InsuranceCompany/Update/:id', model.updateInsuranceCompany);
+app.post('/api_1.0/InsuranceCompany/Update/:insurancecompany_id', model.updateInsuranceCompany);
 app.post('/api_1.0/InsuranceCompany/UpdatePic/:insurancecompany_id', model.updateInsuranceCompanyPic);
 //InsuranceCompany Delete APIs
 app.post('/api_1.0/InsuranceCompany/RemoveInsuranceType/:id', model.removeInsuranceType);
@@ -159,7 +159,7 @@ app.post('/api_1.0/Practice/AddAppointmentReason/:practice_id', model.addAppoint
 app.get('/api_1.0/Practice/GetByID/:practice_id', model.getPracticeByID);
 app.get('/api_1.0/Practice/GetAll', model.getAllPractices);
 //Practice Update APIs
-app.post('/api_1.0/Practice/Update', model.updatePractice);
+app.post('/api_1.0/Practice/Update/:practice_id', model.updatePractice);
 //Practice Delete APIs
 app.post('/api_1.0/Practice/RemoveAppointmentReason/:practice_id', model.removeAppointmentReason);
 app.post('/api_1.0/Practice/Delete', model.deletePractice);

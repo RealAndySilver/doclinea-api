@@ -1056,7 +1056,7 @@ exports.addInsurancetype = function(req,res){
 };
 //Read One
 exports.getInsuranceCompanyByID = function(req,res){
-	InsuranceCompany.findOne({_id:req.params.id},function(err,insurancecompany){
+	InsuranceCompany.findOne({_id:req.params.insurancecompany_id},function(err,insurancecompany){
 		if(!insurancecompany){
 			res.json({status: false, error: "not found"});
 		}
@@ -1079,7 +1079,7 @@ exports.getAllInsuranceCompanies = function(req,res){
 //Update
 exports.updateInsuranceCompany = function(req,res){
 var filtered_body = utils.remove_empty(req.body);
-	InsuranceCompany.findOneAndUpdate({_id:req.params.id},
+	InsuranceCompany.findOneAndUpdate({_id:req.params.insurancecompany_id},
 	   {$set:filtered_body}, 
 	   	function(err,insurancecompany){
 	   	if(!insurancecompany){
@@ -1195,7 +1195,7 @@ exports.getAllPractices = function(req,res){
 //Update
 exports.updatePractice = function(req,res){
 var filtered_body = utils.remove_empty(req.body);
-	Practice.findOneAndUpdate({_id:req.body.id},
+	Practice.findOneAndUpdate({_id:req.params.practice_id},
 	   {$set:filtered_body}, 
 	   	function(err,practice){
 	   	if(!practice){
