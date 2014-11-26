@@ -203,7 +203,7 @@ var PracticeSchema= new mongoose.Schema({
 var InsuranceCompanySchema= new mongoose.Schema({
 	name : {type: String, required:true, unique: true},
 	email : {type: String, required:true, unique: true},
-	logo : {type: String, required:false},
+	logo : {type: Object, required:false},
 	type_list: {type: [TypeSchema]},
 }),
 	InsuranceCompany= mongoose.model('InsuranceCompany',InsuranceCompanySchema);
@@ -997,7 +997,7 @@ utils.log("Hospital/UpdatePic","Recibo:",JSON.stringify(req.files));
 		else{
 			utils.log("Hospital/UpdatePic","Envío:",JSON.stringify(hospital));
 			uploadImage(req.files.image,hospital,"profile", 'hospital');
-			res.json({status: true, response: 'update in progress, get doctor again to see results'})
+			res.json({status: true, response: 'update in progress, get hostpital again to see results'})
 		}
 	});
 };
@@ -1099,7 +1099,7 @@ utils.log("InsuranceCompany/UpdatePic","Recibo:",JSON.stringify(req.files));
 		else{
 			utils.log("InsuranceCompany/UpdatePic","Envío:",JSON.stringify(insurancecompany));
 			uploadImage(req.files.image,insurancecompany,"profile", 'insurancecompany');
-			res.json({status: true, response: 'update in progress, get doctor again to see results'})
+			res.json({status: true, response: 'update in progress, get insurancecompany again to see results'})
 		}
 	});
 };
@@ -1433,9 +1433,9 @@ var uploadImage = function(file,object,type,owner){
 									);
 								}
 							}
-							else{
+							else if(owner == "hospital" || owner == "insurancecompany"){
 								if(type=="profile"){
-									object.profile_pic = {name:image.name, image_url: image.url, id: image._id};
+									object.logo = {name:image.name, image_url: image.url, id: image._id};
 									object.save(function(err,doctor){
 											return {status: true, response: {image_url:image.url}};
 									});
