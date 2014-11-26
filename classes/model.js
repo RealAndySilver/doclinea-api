@@ -1432,6 +1432,14 @@ var uploadImage = function(file,object,type,owner){
 									    }
 									);
 								}
+							}
+							else{
+								if(type=="profile"){
+									object.profile_pic = {name:image.name, image_url: image.url, id: image._id};
+									object.save(function(err,doctor){
+											return {status: true, response: {image_url:image.url}};
+									});
+								}
 							}						
 						}
 					});
