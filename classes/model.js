@@ -967,6 +967,7 @@ exports.getAllHospitals = function(req,res){
 };
 //Update
 exports.updateHospital = function(req,res){
+	console.log("Hospital/Update Recibo:"+ JSON.stringify(req.files));
 	req.body._id='';
 	req.body.email = '';
 	var location_list = [];
@@ -982,7 +983,6 @@ exports.updateHospital = function(req,res){
 		req.body.location_list = utils.isJson(req.body.location_list) ? JSON.parse(req.body.location_list): req.body.location_list ;
 	}
 	var filtered_body = utils.remove_empty(req.body);
-	utils.log("Hospital/Update","Recibo:",JSON.stringify(req.files));
 	Hospital.findOneAndUpdate({_id:req.params.hospital_id},
 	   {$set:filtered_body}, 
 	   	function(err,hospital){
@@ -990,7 +990,6 @@ exports.updateHospital = function(req,res){
 		   	res.json({status: false, error: "not found"});
 	   	}
 	   	else{
-		   	utils.log("Hospital/Update","Envío:",JSON.stringify(hospital));
 		   	res.json({status:true, message:"Hospital actualizado exitosamente."});
 	   	}
 	});
