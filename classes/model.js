@@ -967,6 +967,11 @@ exports.getAllHospitals = function(req,res){
 };
 //Update
 exports.updateHospital = function(req,res){
+	req.body._id='';
+	req.body.email = '';
+	var location_list = [];
+	var location = {};
+	var coordinates = [];
 	if(req.body.location_list){
 		if(req.body.location_list.lat && req.body.location_list.lon){
 			coordinates.push(req.body.location_list.lon);
