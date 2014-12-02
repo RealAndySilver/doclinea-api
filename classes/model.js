@@ -1216,7 +1216,7 @@ var filtered_body = utils.remove_empty(req.body);
 //Delete
 exports.removeAppointmentReason = function(req,res){
 	Practice.findOneAndUpdate(
-	    {_id: req.params.practiceID},
+	    {_id: req.params.practice_id},
 	    {$pull: {type_list: {_id:req.body.reason_id}}},
 	    {multi: true},
 	    function(err, practice) {
