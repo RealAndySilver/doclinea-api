@@ -52,6 +52,10 @@ app.post('/api_1.0/User/NewPassword/*', security.passwordEncrypt);
 
 //////////////////////////////
 
+//Account Verifications
+app.get('/api_1.0/Account/Verify/:type/:emailb64/:encodedb64email', model.verifyAccount);
+app.post('/api_1.0/Account/SendEmailVerification/:type/:emailb64', model.sendEmailVerification);
+///////////////////////
 
 app.get('/api_1.0/Password/Redirect/:type/:email/:request/:token', model.passwordRedirect);
 
@@ -163,6 +167,30 @@ app.post('/api_1.0/Practice/Update/:practice_id', model.updatePractice);
 //Practice Delete APIs
 app.post('/api_1.0/Practice/RemoveAppointmentReason/:practice_id', model.removeAppointmentReason);
 app.post('/api_1.0/Practice/Delete', model.deletePractice);
+///////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////
+//Appointment Create APIs
+app.post('/api_1.0/Appointment/Create/:doctor_id', model.createAppointment);
+//Appointment Get APIs
+app.get('/api_1.0/Appointment/Get/:appointment_id', model.getAppointmentByID);
+app.get('/api_1.0/Appointment/GetAll', model.getPracticeByID);
+app.get('/api_1.0/Appointment/GetAvailableForDoctor/:doctor_id', model.getPracticeByID);
+app.get('/api_1.0/Appointment/GetAllForDoctor/:doctor_id', model.getPracticeByID);
+app.get('/api_1.0/Appointment/GetForUser/:user_id', model.getPracticeByID);
+//Appointment Update APIs
+app.post('/api_1.0/Appointment/Update/:appointment_id', model.updateAppointment);
+app.post('/api_1.0/Appointment/Cancel/:appointment_id', model.updatePractice);
+app.post('/api_1.0/Appointment/Available/:appointment_id', model.updatePractice);
+app.post('/api_1.0/Appointment/External/:appointment_id', model.updatePractice);
+app.post('/api_1.0/Appointment/Take/:appointment_id', model.takeAppointment);
+app.post('/api_1.0/Appointment/Confirm/:appointment_id', model.updatePractice);
+//Appointment Delete APIs
+app.post('/api_1.0/Appointment/Delete/:appointment_id', model.removeAppointmentReason);
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////

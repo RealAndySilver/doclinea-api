@@ -60,6 +60,7 @@ var UserSchema= new mongoose.Schema({
 	email : {type: String, required:true, unique:true,},
 	password : {type: String, required:true},
 	password_recover : {status: {type: Boolean}, token:{type:String}},
+	email_confirmation : {type: Boolean, required:true},
 	name : {type: String, required:true},
 	lastname : {type: String, required:false},
 	gender : {type: String, required:false},
@@ -93,8 +94,10 @@ var DoctorSchema= new mongoose.Schema({
 	password_recover : {status: {type: Boolean}, token:{type:String}},
 	lastname : {type: String, required:true},
 	email : {type: String, required:true, unique:true,},
+	secondary_email : {type: String, required:false,},
 	gender : {type: String, required:true},
 	patient_gender : {type: Number, required:true}, //1 male, 2 female, 3 both
+	email_confirmation : {type: Boolean, required:true},
 	status : {type: String, required:true},
 	payment_list : {type: Array, required:false},
 	last_payment : {type: Object, required:false},
@@ -132,15 +135,20 @@ var DoctorSchema= new mongoose.Schema({
 //Appointment Schema//////////////
 //////////////////////////////////
 var AppointmentSchema= new mongoose.Schema({
-	user_id : {type: String, required:true},
+	user_id : {type: String, required:false},
+	user_name: {type: String, required:false},
+	user_notes: {type: String, required:false},
 	doctor_id : {type: String, required:true},
+	doctor_name: {type: String, required:false},
+	doctor_notes: {type: String, required:false},
 	date_created : {type: Date, required:true},
-	appointment_length : {type: Number, required:true},
+	appointment_length : {type: Number, required:false},
 	type : {type: String, required:false},
-	status : {type: String, required:false},
+	status : {type: String, required:false}, //available, cancelled, confirmed, taken, external
 	reason : {type: String, required:false},
 	date_start : {type: Date, required:true},
-	location : {type: Object, required:true},
+	date_end : {type: Date, required:true},
+	location : {type: Object, required:false},
 }),
 	Appointment= mongoose.model('Appointment',AppointmentSchema);
 //////////////////////////////////
@@ -355,6 +363,7 @@ if(req.body.device_info){
 utils.log("User/Create","Recibo:",JSON.stringify(req.body));
 	new User({
 		email : req.body.email,
+		email_confirmation : false,
 		password : req.body.password,
 		name : req.body.name,
 		lastname : req.body.lastname,
@@ -372,8 +381,9 @@ utils.log("User/Create","Recibo:",JSON.stringify(req.body));
 			res.json(err);
 		}
 		else{
+			emailVerification(req,user,'user');
 			utils.log("User/Create","Envío:",JSON.stringify(user));
-			res.json({status: true, message: "Usuario creado exitosamente.", response: user});
+			res.json({status: true, message: "Usuario creado exitosamente. Proceder a activar la cuenta.", response: user});
 		}
 	});
 };
@@ -427,7 +437,13 @@ utils.log("User/Authenticate","Recibo:",JSON.stringify(req.body));
 					});
 				}
 				else{
-					res.json({status: true, response: user});
+					if(user.email_confirmation){
+						res.json({status: true, response: user});
+					}
+					else{
+						utils.log("User/Authenticate","Envío:","Email no confirmado");
+						res.json({status: false, error: "User not confirmed. Please confirm by email"});
+					}
 				}
 			}
 			else{
@@ -566,13 +582,13 @@ exports.deleteUser = function(req,res){
 		}
 	});
 };
-//////////////////////////////////
-//End of User CRUD///////////////
-//////////////////////////////////
+//////////////////////////////////////
+//End of User CRUD////////////////////
+//////////////////////////////////////
 
-//////////////////////////////////
-//Doctor CRUD starts here//////////
-//////////////////////////////////
+//////////////////////////////////////
+//Doctor CRUD starts here/////////////
+//////////////////////////////////////
 //Create
 exports.createDoctor = function(req,res){
 utils.log("Doctor/Create","Recibo:",JSON.stringify(req.body));
@@ -596,14 +612,13 @@ if(req.body.localidad){
 }
 var practice_list = [];
 practice_list.push(req.body.practice_list);
-
-
 	new Doctor({
 		name : req.body.name,
 		status : false,
 		password : req.body.password,
 		lastname : req.body.lastname,
 		email : req.body.email,
+		email_confirmation : false,
 		gender : req.body.gender, //1 m, 2 f
 		patient_gender : req.body.patient_gender, //1 masculino, 2 femenino, 3 ambos
 		date_created : new Date(),
@@ -620,11 +635,13 @@ practice_list.push(req.body.practice_list);
 			res.json(err);
 		}
 		else{
-			utils.log("User/Create","Envío:",JSON.stringify(doctor));
-			res.json({status: true, message: "Doctor creado exitosamente.", response: doctor});
+			emailVerification(req,doctor,'doctor');
+			utils.log("Doctor/Create","Envío:",JSON.stringify(doctor));
+			res.json({status: true, message: "Doctor creado exitosamente. Proceder a activar la cuenta.", response: doctor});
 		}
 	});
 };
+
 exports.addPicToGallery = function(req,res){
 utils.log("User/AddPicToGallery","Recibo:",JSON.stringify(req.body));
 	Doctor.findOne({_id:req.params.doctor_id},exclude,function(err,doctor){
@@ -781,12 +798,19 @@ utils.log("Doctor/Authenticate","Recibo:",JSON.stringify(req.body));
 		else{
 			//Verificamos que el hash guardado en password sea igual al password de entrada
 			if(security.compareHash(req.body.password, doctor.password)){
-				utils.log("Doctor/Authenticate","Envío:",JSON.stringify(doctor));
-				doctor.password_recover.status = false;
-				doctor.password_recover.token = "";
-				doctor.save(function(err, result){
-					res.json({status: true, response: doctor});
-				});
+				if(doctor.email_confirmation){
+					utils.log("Doctor/Authenticate","Envío:",JSON.stringify(doctor));
+					doctor.password_recover.status = false;
+					doctor.password_recover.token = "";
+					doctor.save(function(err, result){
+						res.json({status: true, response: doctor});
+					});
+				}
+				else{
+					utils.log("Doctor/Authenticate","Envío:","Email no confirmado");
+					res.json({status: false, error: "Doctor not confirmed. Please confirm by email"});
+				}
+				
 			}
 			else{
 				res.json({status: false, error: "not found"});
@@ -880,6 +904,7 @@ utils.log("Doctor/ChangePassword","Recibo:",JSON.stringify(req.body));
 		}
 	});
 };
+
 //Delete
 exports.removeGalleryPic = function(req,res){
 	utils.log("Doctor/RemoveGalleryPic","Recibo:",JSON.stringify(req.body));
@@ -908,13 +933,13 @@ exports.deleteDoctor = function(req,res){
 		}
 	});
 };
-//////////////////////////////////
-//End of Doctor CRUD//////////////
-//////////////////////////////////
+//////////////////////////////////////
+//End of Doctor CRUD//////////////////
+//////////////////////////////////////
 
-//////////////////////////////////
-//Hospital CRUD starts here///////
-//////////////////////////////////
+//////////////////////////////////////
+//Hospital CRUD starts here///////////
+//////////////////////////////////////
 //Create
 exports.createHospital = function(req,res){
 var location = {};
@@ -1019,9 +1044,9 @@ exports.deleteHospital = function(req,res){
 		}
 	});
 };
-//////////////////////////////////
-//End of Hospital CRUD////////////
-//////////////////////////////////
+//////////////////////////////////////
+//End of Hospital CRUD////////////////
+//////////////////////////////////////
 
 //////////////////////////////////////
 //InsuranceCompany CRUD starts here///
@@ -1136,9 +1161,9 @@ exports.deleteInsuranceCompany = function(req,res){
 		}
 	});
 };
-//////////////////////////////////
-//End of InsuranceCompany CRUD////
-//////////////////////////////////
+//////////////////////////////////////
+//End of InsuranceCompany CRUD////////
+//////////////////////////////////////
 
 //////////////////////////////////////
 //Practice CRUD starts here///////////
@@ -1240,7 +1265,262 @@ exports.deletePractice = function(req,res){
 	});
 };
 //////////////////////////////////
-//End of Practice CRUD////
+//End of Practice CRUD////////////
+//////////////////////////////////
+
+//////////////////////////////////
+//Appointment CRUD starts here////
+//////////////////////////////////
+//Create
+exports.createAppointment = function(req,res){
+	var filtered_body = utils.remove_empty(req.body);
+	new Appointment({
+		doctor_id : req.params.doctor_id,
+		doctor_name: req.body.doctor_name,
+		doctor_notes: req.body.doctor_notes,
+		date_created : new Date(),
+		appointment_length : 10,
+		type : req.body.type,
+		status : req.body.status, //available, cancelled, confirmed, taken, external
+		date_start : req.body.date_start,
+		date_end : req.body.date_end,
+		location : req.body.location,
+	}).save(function(err,appointment){
+		if(err){
+			res.json({status: false, error:err, message: "La cita no pudo ser creada"});
+		}
+		else{
+			res.json({status: true, message: "Cita "+req.body.status+ " creada exitosamente."});
+		}
+	});
+};
+//Read One
+exports.getAppointmentByID = function(req,res){
+	Appointment.findOne({_id:req.params.appoinment_id},function(err,appointment){
+		if(!appointment){
+			res.json({status: false, error: "not found"});
+		}
+		else{
+			res.json({status: true, response: appointment});
+		}
+	});
+};
+//Read Many
+exports.getAppointmentsAvailableForDoctor = function(req,res){
+	Appointment.find({doctor_id:req.params.doctor_id, status:"available"},function(err,appointment){
+		if(!appointment){
+			res.json({status: false, error: "not found"});
+		}
+		else{
+			res.json({status: true, response: appointment});
+		}
+	});
+};
+exports.getTakenAppointmentsByUser = function(req,res){
+	Appointment.find({user_id:req.params.user_id, $or:[{status: "available"},{status:"confirmed"}]},function(err,appointment){
+		if(!appointment){
+			res.json({status: false, error: "not found"});
+		}
+		else{
+			res.json({status: true, response: appointment});
+		}
+	});
+};
+//Read All
+exports.getAllAppointments = function(req,res){
+	Appointment.find({},function(err,appointments){
+		if(err){
+			res.json({status: false, error: "not found"});
+		}
+		else{
+			res.json({status: true, response: appointments});
+		}
+	});
+};
+exports.getAllAppointmentsForDoctor = function(req,res){
+	Appointment.find({doctor_id:req.params.doctor_id},function(err,appointments){
+		if(!appointments){
+			res.json({status: false, error: "not found"});
+		}
+		else{
+			res.json({status: true, response: appointments});
+		}
+	});
+};
+exports.getAllAppointmentsForUser = function(req,res){
+	Appointment.find({user_id:req.params.user_id},function(err,appointment){
+		if(!appointment){
+			res.json({status: false, error: "not found"});
+		}
+		else{
+			res.json({status: true, response: appointment});
+		}
+	});
+};
+//Update
+exports.takeAppointment = function(req,res){
+var filtered_body = utils.remove_empty(req.body);
+	utils.log("Appointment/Take","Recibo:",JSON.stringify(req.body));
+	Appointment.findOneAndUpdate({_id:req.params.appointment_id},
+	   {$set:{status: "taken", user_id:filtered_body.user_id, user_name: filtered_body.user_name}}, 
+	   	function(err,appointment){
+	   	if(!appointment){
+		   	res.json({status: false, error: "not found"});
+	   	}
+	   	else{
+		   	utils.log("Appointment/Update","Envío:",JSON.stringify(appointment));
+		   	res.json({status:true, message:"Cita actualizado exitosamente."});
+	   	}
+	});
+};
+exports.updateAppointment = function(req,res){
+var filtered_body = utils.remove_empty(req.body);
+	utils.log("Appointment/Update","Recibo:",JSON.stringify(req.body));
+	Appointment.findOneAndUpdate({_id:req.params.appointment_id},
+	   {$set:filtered_body}, 
+	   	function(err,appointment){
+	   	if(!appointment){
+		   	res.json({status: false, error: "not found"});
+	   	}
+	   	else{
+		   	utils.log("Appointment/Update","Envío:",JSON.stringify(appointment));
+		   	res.json({status:true, message:"Cita actualizado exitosamente."});
+	   	}
+	});
+};
+exports.updateHospitalPic = function(req,res){
+utils.log("Hospital/UpdatePic","Recibo:",JSON.stringify(req.files));
+	Hospital.findOne({_id:req.params.hospital_id},exclude,function(err,hospital){
+		if(!hospital){
+			res.json({status: false, error: "not found"});
+		}
+		else{
+			utils.log("Hospital/UpdatePic","Envío:",JSON.stringify(hospital));
+			uploadImage(req.files.image,hospital,"profile", 'hospital');
+			res.json({status: true, response: 'update in progress, get hostpital again to see results'})
+		}
+	});
+};
+//Delete
+exports.deleteHospital = function(req,res){
+	Hospital.remove({_id:req.body.id},function(err){
+		if(err){
+			res.json(error.notFound);
+		}
+		else{
+			res.json({status:true, message:"Hospital borrado exitosamente."});
+		}
+	});
+};
+//////////////////////////////////
+//End of Appointment CRUD/////////
+//////////////////////////////////
+
+//////////////////////////////////
+//Verify//////////////////////////
+//////////////////////////////////
+//Verify
+exports.verifyAccount= function(req,res){
+	utils.log("Account/Verify/"+req.params.type,"Recibo:",req.params.emailb64);
+	var email_decoded = security.decodeBase64(req.params.emailb64);
+	if(req.params.type == "doctor"){
+		Doctor.findOne({email:email_decoded},function(err,doctor){
+		if(!doctor){
+			res.json({status: false, error: "not found"});
+		}
+		else{
+			var checkIfConfirmed = doctor.email_confirmation;
+			doctor.email_confirmation = true;
+			doctor.save(function(err, result){
+				if(err){
+					res.json({status: false, error: err});
+				}
+				else{
+					if(result){
+						//mail.send("Token: "+token, doctor.email);
+						var hostname = req.headers.host;
+						var url = 'http://localhost:3000';
+						//var url2= "doclinea://?token="+tokenB64+"&type=doctor&request=new_password";
+						if(!checkIfConfirmed){
+							mail.send("Cuenta Activada", "Hola "+doctor.name+". <br>Gracias por preferir Doclinea. Tu cuenta ha sido activada y está lista para ser usada. Entra ya a <br> <a href='"+url+"'> Doclinea </a>", doctor.email);
+						}
+						
+						var data = {};
+						data.email = email_decoded;
+						data.type = 'doctor';
+						browserAccountRedirect(req,res,data);
+					}
+				}
+			});
+		}
+	});
+	}
+	else if(req.params.type == "user"){
+		User.findOne({email:email_decoded},function(err,user){
+			if(!user){
+				res.json({status: false, error: "not found"});
+			}
+			else{
+				var checkIfConfirmed = user.email_confirmation;
+				user.email_confirmation = true;
+				user.save(function(err, result){
+					if(err){
+						res.json({status: false, error: err});
+					}
+					else{
+						if(result){
+							//mail.send("Token: "+token, doctor.email);
+							var hostname = req.headers.host;
+							var url = 'http://localhost:3000';
+							//var url2= "doclinea://?token="+tokenB64+"&type=doctor&request=new_password";
+							if(!checkIfConfirmed){
+								mail.send("Cuenta Activada", "Hola "+user.name+". <br>Gracias por preferir Doclinea. Tu cuenta ha sido activada y está lista para ser usada. Entra ya a <br> <a href='"+url+"'> Doclinea </a>", user.email);
+							}
+							
+							var data = {};
+							data.email = email_decoded;
+							data.type = 'user';
+							browserAccountRedirect(req,res,data);
+						}
+					}
+				});
+			}
+		});
+	}
+};
+exports.sendEmailVerification = function(req,res){
+	utils.log("Account/SendEmailVerification","Recibo:",JSON.stringify(req.body));
+	var email_decoded = security.decodeBase64(req.params.emailb64);
+	if(email_decoded == req.body.email){
+		if(req.params.type == 'doctor'){
+			Doctor.findOne({email:email_decoded}, function(err,doctor){
+				if(!doctor){
+					res.json({status: false, error: 'not found'});
+				}
+				else{
+					emailVerification(req,doctor,'doctor');
+					res.json({status: true, response: 'Email sent to: '+doctor.email});
+				}
+			});
+		}
+		else if(req.params.type == 'user'){
+			User.findOne({email:email_decoded}, function(err,user){
+				if(!user){
+					res.json({status: false, error: 'not found'});
+				}
+				else{
+					emailVerification(req,user,'user');
+					res.json({status: true, response: 'Email sent to: '+user.email});
+				}
+			});
+		}
+	}
+	else{
+		res.json({status: false, error: 'Wrong data.'});
+	}
+};
+//////////////////////////////////
+//End of Verify///////////////////
 //////////////////////////////////
 
 //////////////////////////////////
@@ -1380,6 +1660,7 @@ var ios = req.body.ios ? true:false;
 /////////////////////////////////
 //Functions//////////////////////
 /////////////////////////////////
+//Image Uploader//
 var uploadImage = function(file,object,type,owner){
 	if(!file){
 		object.profile_pic = {name:"", image_url: ""};
@@ -1458,6 +1739,45 @@ var uploadImage = function(file,object,type,owner){
 	    console.log('no hay imagen');
     }
 }
+//Browser Account Redirect//
+var browserAccountRedirect = function (req,res,data){
+	var ua = req.headers['user-agent'],
+	    $ = {};
+	
+	if (/mobile/i.test(ua)){
+	
+	}
+	
+	if (/like Mac OS X/.test(ua)) {
+	    res.redirect('doclinea://?token='+req.params.token+'&type='+req.params.type+'&request='+req.params.request+'&email='+req.params.email);
+	}
+	
+	if (/Android/.test(ua)){
+	
+	}
+	
+	if (/webOS\//.test(ua)){
+		
+	}
+	
+	if (/(Intel|PPC) Mac OS X/.test(ua)){
+		res.redirect('http://localhost:3000/#/account_activation/'+data.type+'/'+data.email);
+	}
+	
+	if (/Windows NT/.test(ua)){
+		
+	}	
+};
+//Email Verifier//
+var emailVerification = function (req,data,type){
+	console.log("Doc: "+data);
+	var token = security.encrypt(data.email);
+	var tokenB64 = security.base64(token);
+	var emailB64 = security.base64(data.email);
+	var hostname = req.headers.host;
+	var url = 'http://'+hostname+'/api_1.0/Account/Verify/'+type+'/'+emailB64+'/'+tokenB64;
+				mail.send("Verificar Cuenta", "Hola "+data.name+". <br>Ingresa a este link para verificar tu cuenta:<br> <a href='"+url+"'> Verificar </a>", data.email);
+};
 /////////////////////////////////
 //End of Functions///////////////
 /////////////////////////////////
