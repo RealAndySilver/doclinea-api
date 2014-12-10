@@ -43,7 +43,11 @@ app.get('/*', function(req, res, next){
   res.setHeader('Last-Modified', (new Date()).toUTCString());
   next(); 
 });
-
+app.post('/dazuku', function(req, res, next){ 
+  console.log("Header: "+JSON.stringify(req.headers));
+  res.json({response:req.body, headers:req.headers});
+  //next(); 
+});
 //Middleware to encode password
 app.post('/api_1.0/User/Create', security.passwordEncrypt);
 app.post('/api_1.0/Doctor/Create', security.passwordEncrypt);

@@ -412,7 +412,7 @@ exports.authenticateUser = function(req,res){
 utils.log("User/Authenticate","Recibo:",JSON.stringify(req.body));
 	User.findOne({email:req.body.email},exclude,function(err,user){
 		if(!user){
-			res.json({status: false, error: "not found"});
+			res.json({status: false, error: "not found", error_id:0});
 		}
 		else{
 			//Verificamos que el hash guardado en password sea igual al password de entrada
@@ -425,14 +425,35 @@ utils.log("User/Authenticate","Recibo:",JSON.stringify(req.body));
 					User.findOneAndUpdate({email:req.body.email}, {$addToSet:{devices:req.body.device_info}}, function(err,new_user){
 						if(!err){
 							if(!new_user){
-								res.json({status: true, response: user, message:"Autenticado correctamente, pero no se pudo agregar el dispositivo"});
+								if(user.email_confirmation){
+									utils.log("User/Authenticate","Envío:",JSON.stringify(user));
+									res.json({status: true, response: user, message:"Autenticado correctamente, pero no se pudo agregar el dispositivo"});
+								}
+								else{
+									utils.log("User/Authenticate","Envío:","Email no confirmado");
+									res.json({status: false, error: "User not confirmed. Please confirm by email", error_id:1});
+								}						
 							}
 							else{
-								res.json({status: true, response: new_user});
+								if(user.email_confirmation){
+									utils.log("User/Authenticate","Envío:",JSON.stringify(user));
+									res.json({status: true, response: new_user});
+								}
+								else{
+									utils.log("User/Authenticate","Envío:","Email no confirmado");
+									res.json({status: false, error: "User not confirmed. Please confirm by email", error_id:1});
+								}
 							}
 						}
 						else{
+							if(user.email_confirmation){
+								utils.log("User/Authenticate","Envío:",JSON.stringify(user));
 								res.json({status: true, response: user, message:"Autenticado correctamente, pero ocurrió un error.", error:err});
+							}
+							else{
+								utils.log("User/Authenticate","Envío:","Email no confirmado");
+								res.json({status: false, error: "User not confirmed. Please confirm by email", error_id:1});
+							}
 						}
 					});
 				}
@@ -442,7 +463,7 @@ utils.log("User/Authenticate","Recibo:",JSON.stringify(req.body));
 					}
 					else{
 						utils.log("User/Authenticate","Envío:","Email no confirmado");
-						res.json({status: false, error: "User not confirmed. Please confirm by email"});
+						res.json({status: false, error: "User not confirmed. Please confirm by email", error_id:1});
 					}
 				}
 			}
@@ -694,6 +715,13 @@ var filtered_body = utils.remove_empty(req.body);
 
 var query = {};
 query = req.body;
+
+//Esta línea filtra a los doctores que hayan sido validados por email previamente
+//Se le puede agregar que el status del doctor sea activo en un futuro cuando se implementen los pagos.
+///NO OLVIDAR DESCOMENTAR!!
+//query.email_confirmation = true;
+
+
 var meters = parseInt(req.body.meters);
 delete req.body.meters;
 if(req.body.lat && req.body.lon){
@@ -793,7 +821,7 @@ exports.authenticateDoctor = function(req,res){
 utils.log("Doctor/Authenticate","Recibo:",JSON.stringify(req.body));
 	Doctor.findOne({email:req.body.email},exclude,function(err,doctor){
 		if(!doctor){
-			res.json({status: false, error: "not found"});
+			res.json({status: false, error: "not found", error_id:0});//0 doctor not found
 		}
 		else{
 			//Verificamos que el hash guardado en password sea igual al password de entrada
@@ -808,12 +836,12 @@ utils.log("Doctor/Authenticate","Recibo:",JSON.stringify(req.body));
 				}
 				else{
 					utils.log("Doctor/Authenticate","Envío:","Email no confirmado");
-					res.json({status: false, error: "Doctor not confirmed. Please confirm by email"});
+					res.json({status: false, error: "Doctor not confirmed. Please confirm by email", error_id:1});//1 doctor not confirmed 
 				}
 				
 			}
 			else{
-				res.json({status: false, error: "not found"});
+				res.json({status: false, error: "not found", error_id:0});//0 doctor not found
 			}
 		}
 	});
@@ -1749,7 +1777,7 @@ var browserAccountRedirect = function (req,res,data){
 	}
 	
 	if (/like Mac OS X/.test(ua)) {
-	    res.redirect('doclinea://?token='+req.params.token+'&type='+req.params.type+'&request='+req.params.request+'&email='+req.params.email);
+	    res.redirect('doclinea://email_verification?email='+data.email+'&type='+data.type);
 	}
 	
 	if (/Android/.test(ua)){
@@ -1794,7 +1822,7 @@ exports.passwordRedirect = function (req, res){
 	}
 	
 	if (/like Mac OS X/.test(ua)) {
-	    res.redirect('doclinea://?token='+req.params.token+'&type='+req.params.type+'&request='+req.params.request+'&email='+req.params.email);
+	    res.redirect('doclinea://password_redirect?token='+req.params.token+'&type='+req.params.type+'&request='+req.params.request+'&email='+req.params.email);
 	}
 	
 	if (/Android/.test(ua)){
