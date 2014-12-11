@@ -773,6 +773,9 @@ if(req.body.education_list){
 if(req.body.location_list){
 	req.body.location_list = utils.isJson(req.body.location_list) ? JSON.parse(req.body.location_list): req.body.location_list ;
 }
+if(req.body.practice_list){
+	req.body.practice_list = utils.isJson(req.body.practice_list) ? JSON.parse(req.body.practice_list): req.body.practice_list ;
+}
 
 if(req.body.location_list){
 	if(req.body.location_list.lat && req.body.location_list.lon){

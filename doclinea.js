@@ -44,7 +44,7 @@ app.get('/*', function(req, res, next){
   next(); 
 });
 app.post('/dazuku', function(req, res, next){ 
-  console.log("Header: "+JSON.stringify(req.headers));
+  console.log("Header: "+JSON.stringify(req.headers) + "\nBody: "+JSON.stringify(req.body));
   res.json({response:req.body, headers:req.headers});
   //next(); 
 });
