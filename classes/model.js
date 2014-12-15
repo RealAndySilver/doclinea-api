@@ -1833,7 +1833,8 @@ var browserAccountRedirect = function (req,res,data){
 	}
 	
 	if (/(Intel|PPC) Mac OS X/.test(ua)){
-		res.redirect('http://localhost:3000/#/account_activation/'+data.type+'/'+data.email);
+		var hostname = req.headers.host;
+		res.redirect('http://'+hostname+':3000/#/account_activation/'+data.type+'/'+data.email);
 	}
 	
 	if (/Windows NT/.test(ua)){
@@ -1878,7 +1879,8 @@ exports.passwordRedirect = function (req, res){
 	}
 	
 	if (/(Intel|PPC) Mac OS X/.test(ua)){
-		res.redirect('http://localhost:3000/#/NewPassword/'+req.params.token+'/'+req.params.type+'/'+req.params.request+'/'+req.params.email);
+		var hostname = req.headers.host;
+		res.redirect('http://'+hostname+':3000/#/NewPassword/'+req.params.token+'/'+req.params.type+'/'+req.params.request+'/'+req.params.email);
 	}
 	
 	if (/Windows NT/.test(ua)){
