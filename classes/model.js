@@ -1511,7 +1511,7 @@ exports.verifyAccount= function(req,res){
 					if(result){
 						//mail.send("Token: "+token, doctor.email);
 						//var hostname = req.headers.host;
-						var hostname = "http://192.241.187.135";
+						var hostname = "192.241.187.135";
 						var url = 'http://'+hostname+':3000';
 						//var url2= "doclinea://?token="+tokenB64+"&type=doctor&request=new_password";
 						if(!checkIfConfirmed){
@@ -1544,7 +1544,7 @@ exports.verifyAccount= function(req,res){
 						if(result){
 							//mail.send("Token: "+token, doctor.email);
 							//var hostname = req.headers.host;
-							var hostname = "http://192.241.187.135";
+							var hostname = "192.241.187.135";
 							var url = 'http://'+hostname+':3000';
 							//var url2= "doclinea://?token="+tokenB64+"&type=doctor&request=new_password";
 							if(!checkIfConfirmed){
@@ -1851,7 +1851,7 @@ var emailVerification = function (req,data,type){
 	var tokenB64 = security.base64(token);
 	var emailB64 = security.base64(data.email);
 	//var hostname = req.headers.host;
-	var hostname = "http://192.241.187.135";
+	var hostname = "192.241.187.135";
 	var url = 'http://'+hostname+'/api_1.0/Account/Verify/'+type+'/'+emailB64+'/'+tokenB64;
 				mail.send("Verificar Cuenta", "Hola "+data.name+". <br>Ingresa a este link para verificar tu cuenta:<br> <a href='"+url+"'> Verificar </a>", data.email);
 };
@@ -1884,7 +1884,7 @@ exports.passwordRedirect = function (req, res){
 	
 	if (/(Intel|PPC) Mac OS X/.test(ua)){
 		//var hostname = req.headers.host;
-		var hostname = "http://192.241.187.135";
+		var hostname = "192.241.187.135";
 		res.redirect('http://'+hostname+':3000/#/NewPassword/'+req.params.token+'/'+req.params.type+'/'+req.params.request+'/'+req.params.email);
 	}
 	
