@@ -1511,7 +1511,7 @@ exports.verifyAccount= function(req,res){
 					if(result){
 						//mail.send("Token: "+token, doctor.email);
 						var hostname = req.headers.host;
-						var url = 'http://localhost:3000';
+						var url = 'http://'+hostname+':3000';
 						//var url2= "doclinea://?token="+tokenB64+"&type=doctor&request=new_password";
 						if(!checkIfConfirmed){
 							mail.send("Cuenta Activada", "Hola "+doctor.name+". <br>Gracias por preferir Doclinea. Tu cuenta ha sido activada y está lista para ser usada. Entra ya a <br> <a href='"+url+"'> Doclinea </a>", doctor.email);
@@ -1543,7 +1543,7 @@ exports.verifyAccount= function(req,res){
 						if(result){
 							//mail.send("Token: "+token, doctor.email);
 							var hostname = req.headers.host;
-							var url = 'http://localhost:3000';
+							var url = 'http://'+hostname+':3000';
 							//var url2= "doclinea://?token="+tokenB64+"&type=doctor&request=new_password";
 							if(!checkIfConfirmed){
 								mail.send("Cuenta Activada", "Hola "+user.name+". <br>Gracias por preferir Doclinea. Tu cuenta ha sido activada y está lista para ser usada. Entra ya a <br> <a href='"+url+"'> Doclinea </a>", user.email);
