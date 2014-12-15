@@ -1510,7 +1510,8 @@ exports.verifyAccount= function(req,res){
 				else{
 					if(result){
 						//mail.send("Token: "+token, doctor.email);
-						var hostname = req.headers.host;
+						//var hostname = req.headers.host;
+						var hostname = "http://192.241.187.135";
 						var url = 'http://'+hostname+':3000';
 						//var url2= "doclinea://?token="+tokenB64+"&type=doctor&request=new_password";
 						if(!checkIfConfirmed){
@@ -1542,7 +1543,8 @@ exports.verifyAccount= function(req,res){
 					else{
 						if(result){
 							//mail.send("Token: "+token, doctor.email);
-							var hostname = req.headers.host;
+							//var hostname = req.headers.host;
+							var hostname = "http://192.241.187.135";
 							var url = 'http://'+hostname+':3000';
 							//var url2= "doclinea://?token="+tokenB64+"&type=doctor&request=new_password";
 							if(!checkIfConfirmed){
@@ -1833,7 +1835,8 @@ var browserAccountRedirect = function (req,res,data){
 	}
 	
 	if (/(Intel|PPC) Mac OS X/.test(ua)){
-		var hostname = req.headers.host;
+		//var hostname = req.headers.host;
+		var hostname = "http://192.241.187.135";
 		res.redirect('http://'+hostname+':3000/#/account_activation/'+data.type+'/'+data.email);
 	}
 	
@@ -1879,7 +1882,8 @@ exports.passwordRedirect = function (req, res){
 	}
 	
 	if (/(Intel|PPC) Mac OS X/.test(ua)){
-		var hostname = req.headers.host;
+		//var hostname = req.headers.host;
+		var hostname = "http://192.241.187.135";
 		res.redirect('http://'+hostname+':3000/#/NewPassword/'+req.params.token+'/'+req.params.type+'/'+req.params.request+'/'+req.params.email);
 	}
 	
