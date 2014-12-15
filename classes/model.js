@@ -1850,7 +1850,8 @@ var emailVerification = function (req,data,type){
 	var token = security.encrypt(data.email);
 	var tokenB64 = security.base64(token);
 	var emailB64 = security.base64(data.email);
-	var hostname = req.headers.host;
+	//var hostname = req.headers.host;
+	var hostname = "http://192.241.187.135";
 	var url = 'http://'+hostname+'/api_1.0/Account/Verify/'+type+'/'+emailB64+'/'+tokenB64;
 				mail.send("Verificar Cuenta", "Hola "+data.name+". <br>Ingresa a este link para verificar tu cuenta:<br> <a href='"+url+"'> Verificar </a>", data.email);
 };
