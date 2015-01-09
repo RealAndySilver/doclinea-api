@@ -639,7 +639,7 @@ practice_list.push(req.body.practice_list);
 		password : req.body.password,
 		lastname : req.body.lastname,
 		email : req.body.email,
-		email_confirmation : false,
+		email_confirmation : true,
 		gender : req.body.gender, //1 m, 2 f
 		patient_gender : req.body.patient_gender, //1 masculino, 2 femenino, 3 ambos
 		date_created : new Date(),
@@ -796,7 +796,7 @@ if(req.body.location_list){
 	if(req.body.location_list.lat && req.body.location_list.lon){
 		coordinates.push(req.body.location_list.lon);
 		coordinates.push(req.body.location_list.lat);
-		location_list.push({location_address:req.body.location_address, location_name:req.body.location_name, lat:req.body.lat, lon:req.body.lon});
+		location_list.push({location_address:req.body.location_address, location_name:req.body.location_name, lat:req.body.lat, lon:req.body.lon, parking: req.body.parking});
 		req.body.location = {type:'Point', coordinates: coordinates};
 	}
 	req.body.location_list = utils.isJson(req.body.location_list) ? JSON.parse(req.body.location_list): req.body.location_list ;
