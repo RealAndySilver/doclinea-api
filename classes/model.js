@@ -21,6 +21,7 @@ var colors = require('colors');
 //Global Vars/////////////////////
 //////////////////////////////////
 var exclude = {/*password:0*/};
+var verifyEmailVar = false;
 //////////////////////////////////
 //End of Global Vars//////////////
 //////////////////////////////////
@@ -363,7 +364,7 @@ if(req.body.device_info){
 utils.log("User/Create","Recibo:",JSON.stringify(req.body));
 	new User({
 		email : req.body.email,
-		email_confirmation : false,
+		email_confirmation : verifyEmailVar,
 		password : req.body.password,
 		name : req.body.name,
 		lastname : req.body.lastname,
@@ -639,7 +640,7 @@ practice_list.push(req.body.practice_list);
 		password : req.body.password,
 		lastname : req.body.lastname,
 		email : req.body.email,
-		email_confirmation : true,
+		email_confirmation : verifyEmailVar,
 		gender : req.body.gender, //1 m, 2 f
 		patient_gender : req.body.patient_gender, //1 masculino, 2 femenino, 3 ambos
 		date_created : new Date(),
@@ -779,6 +780,12 @@ if(req.body.location_list){
 }
 if(req.body.practice_list){
 	req.body.practice_list = utils.isJson(req.body.practice_list) ? JSON.parse(req.body.practice_list): req.body.practice_list ;
+}
+if(req.body.profesional_membership){
+	req.body.profesional_membership = utils.isJson(req.body.profesional_membership) ? JSON.parse(req.body.profesional_membership): req.body.profesional_membership ;
+}
+if(req.body.insurance_list){
+	req.body.insurance_list = utils.isJson(req.body.insurance_list) ? JSON.parse(req.body.insurance_list): req.body.insurance_list ;
 }
 ///////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////

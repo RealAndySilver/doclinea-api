@@ -10,7 +10,7 @@
     "jade": "*",
     "less-middleware": "*",
     "mongoose": "3.6.14",
-    "nodemailer": "*",
+    "nodemailer": "0.7.1",
     "apn": "1.4.1",
     "stylus": "*",
     "knox": "*",
