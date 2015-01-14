@@ -15,7 +15,7 @@
     "stylus": "*",
     "knox": "*",
     "node-gcm": "*",
-    "bcrypt" : "*",
+    "bcrypt" : "0.8.0",
     "colors" : "*",
     "nodemon": "*"
   },
