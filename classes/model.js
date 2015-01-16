@@ -712,6 +712,25 @@ exports.getAllDoctors = function(req,res){
 	});
 };
 exports.getDoctorsByParams = function(req,res){
+	
+	
+///////////////////////////////////////////////////////////////////////////
+//Estas comprobaciones se encargan de revisar los datos y parsearlos en json si es necesario 
+//(iOS envía texto y hay que parsearlo)
+///////////////////////////////////////////////////////////////////////////
+if(req.body.localidad){
+	req.body.localidad = utils.isJson(req.body.localidad) ? JSON.parse(req.body.localidad): req.body.localidad ;
+}
+if(req.body.insurance_list){
+	/////////////////
+	//En este caso utilizamos $elemMatch y $and para que busque un objeto específico en un arreglo
+	/////////////////
+	req.body.insurance_list = {$elemMatch: {$and: utils.isJson(req.body.insurance_list) ? JSON.parse(req.body.insurance_list): req.body.insurance_list }};
+}
+///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
+
 var filtered_body = utils.remove_empty(req.body);
 
 var query = {};
@@ -833,6 +852,11 @@ if (req.body.education_list){
 if (req.body.practice_list){
 	if(req.body.practice_list[0] == 0){
 		req.body.practice_list = [];
+	}
+}
+if (req.body.insurance_list){
+	if(req.body.insurance_list[0] == 0){
+		req.body.insurance_list = [];
 	}
 }
 ///////////////////////////////////////////////////////////////////////////
