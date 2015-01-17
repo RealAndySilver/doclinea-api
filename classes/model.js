@@ -1584,7 +1584,7 @@ exports.verifyAccount= function(req,res){
 							var url = 'http://'+hostname+':3000';
 							//var url2= "doclinea://?token="+tokenB64+"&type=doctor&request=new_password";
 							if(!checkIfConfirmed){
-								mail.send("Cuenta Activada", "Hola "+user.name+". <br>Gracias por preferir Doclinea. Tu cuenta ha sido activada y está lista para ser usada. Entra ya a <br> <a href='"+url+"'> Doclinea </a>", user.email);
+								mail.send("!Bienvenido a DocLinea!", "Hola "+doctor.name+". <br>DocLinea te permite encontrar y reservar citas con Doctores <b>al instante, en línea, cerca de ti y totalmente Gratis!</b><br> Con DocLinea puedes visualizar, reprogramar o cancelar tus citas en cualquier momento, 24 horas/ 7 días a la semana.<br> Tu Usuario: "+ user.email+"<br> Reserva ya tu próxima cita médica! <a href='"+url+"'> Doclinea </a><br>Saludos! Tu Equipo DocLinea", user.email);
 							}
 							
 							var data = {};
@@ -1877,7 +1877,7 @@ var browserAccountRedirect = function (req,res,data){
 	}
 	
 	if (/Windows NT/.test(ua)){
-		
+		res.redirect('http://'+hostname+':3000/#/account_activation/'+data.type+'/'+data.email);
 	}	
 };
 //Email Verifier//
@@ -1889,7 +1889,7 @@ var emailVerification = function (req,data,type){
 	//var hostname = req.headers.host;
 	var hostname = "192.241.187.135";
 	var url = 'http://'+hostname+':1414/api_1.0/Account/Verify/'+type+'/'+emailB64+'/'+tokenB64;
-				mail.send("Verificar Cuenta", "Hola "+data.name+". <br>Ingresa a este link para verificar tu cuenta:<br> <a href='"+url+"'> Verificar </a>", data.email);
+				mail.send("Verifica tu cuenta", "Hola "+data.name+"!. <br>Estás a solo un paso de ser parte de DocLinea!  Verifica tu cuenta haciendo click en el siguiente botón:<br> <a href='"+url+"'> Verificar </a><br>Saludos! Tu equipo DocLinea.", data.email);
 };
 /////////////////////////////////
 //End of Functions///////////////
