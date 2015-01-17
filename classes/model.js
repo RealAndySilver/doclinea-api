@@ -6,6 +6,7 @@ var apn = require('apn');
 var send_push = require('../classes/push_sender');
 var utils = require('../classes/utils');
 var mail = require('../classes/mail_sender');
+var mail_template = require('../classes/mail_templates');
 var fs = require('fs');
 mongoose.connect("mongodb://iAmUser:iAmStudio1@ds061199.mongolab.com:61199/doclinea");
 var express = require('express');
@@ -1551,7 +1552,7 @@ exports.verifyAccount= function(req,res){
 						var url = 'http://'+hostname+':3000';
 						//var url2= "doclinea://?token="+tokenB64+"&type=doctor&request=new_password";
 						if(!checkIfConfirmed){
-							mail.send("Cuenta Activada", "Hola "+doctor.name+". <br>Gracias por preferir Doclinea. Tu cuenta ha sido activada y está lista para ser usada. Entra ya a <br> <a href='"+url+"'> Doclinea </a>", doctor.email);
+							mail.send("Cuenta Activada", mail_template.doctor_new_account(doctor,url), doctor.email);
 						}
 						
 						var data = {};
@@ -1584,7 +1585,7 @@ exports.verifyAccount= function(req,res){
 							var url = 'http://'+hostname+':3000';
 							//var url2= "doclinea://?token="+tokenB64+"&type=doctor&request=new_password";
 							if(!checkIfConfirmed){
-								mail.send("!Bienvenido a DocLinea!", "Hola "+doctor.name+". <br>DocLinea te permite encontrar y reservar citas con Doctores <b>al instante, en línea, cerca de ti y totalmente Gratis!</b><br> Con DocLinea puedes visualizar, reprogramar o cancelar tus citas en cualquier momento, 24 horas/ 7 días a la semana.<br> Tu Usuario: "+ user.email+"<br> Reserva ya tu próxima cita médica! <a href='"+url+"'> Doclinea </a><br>Saludos! Tu Equipo DocLinea", user.email);
+								mail.send("!Bienvenido a DocLinea!", mail_template.user_new_account(doctor,url), user.email);
 							}
 							
 							var data = {};
