@@ -23,6 +23,12 @@ var colors = require('colors');
 //////////////////////////////////
 var exclude = {/*password:0*/};
 var verifyEmailVar = false;
+
+//Producción
+//var hostname = "192.241.187.135";
+//Dev
+var hostname = "192.168.0.32";
+
 //////////////////////////////////
 //End of Global Vars//////////////
 //////////////////////////////////
@@ -526,7 +532,6 @@ exports.requestRecoverUser = function(req,res){
 				else{
 					if(result){
 						//mail.send("Token: "+token, doctor.email);
-						var hostname = req.headers.host;
 						var url = 'http://'+hostname+'/api_1.0/Password/Redirect/user/'+user.email+'/new_password/'+tokenB64;
 						//var url2= "doclinea://?token="+tokenB64+"&type=doctor&request=new_password";
 						mail.send("Recuperar Contraseña", 
@@ -945,7 +950,6 @@ exports.requestRecoverDoctor = function(req,res){
 				else{
 					if(result){
 						//mail.send("Token: "+token, doctor.email);
-						var hostname = req.headers.host;
 						var url = 'http://'+hostname+'/api_1.0/Password/Redirect/doctor/'+doctor.email+'/new_password/'+tokenB64;
 						//var url2= "doclinea://?token="+tokenB64+"&type=doctor&request=new_password";
 						mail.send("Recuperar Contraseña", 
@@ -1547,8 +1551,6 @@ exports.verifyAccount= function(req,res){
 				else{
 					if(result){
 						//mail.send("Token: "+token, doctor.email);
-						//var hostname = req.headers.host;
-						var hostname = "192.241.187.135";
 						var url = 'http://'+hostname+':3000';
 						//var url2= "doclinea://?token="+tokenB64+"&type=doctor&request=new_password";
 						if(!checkIfConfirmed){
@@ -1581,8 +1583,6 @@ exports.verifyAccount= function(req,res){
 					else{
 						if(result){
 							//mail.send("Token: "+token, doctor.email);
-							//var hostname = req.headers.host;
-							var hostname = "192.241.187.135";
 							var url = 'http://'+hostname+':3000';
 							//var url2= "doclinea://?token="+tokenB64+"&type=doctor&request=new_password";
 							if(!checkIfConfirmed){
@@ -1857,29 +1857,35 @@ var browserAccountRedirect = function (req,res,data){
 	    $ = {};
 	
 	if (/mobile/i.test(ua)){
-	
+		console.log("Caso MOBILE");
 	}
 	
 	if (/like Mac OS X/.test(ua)) {
+		console.log("Caso MACOSX");
 	    res.redirect('doclinea://email_verification?email='+data.email+'&type='+data.type);
+	    return;
 	}
 	
 	if (/Android/.test(ua)){
-	
+		console.log("Caso Android");
+		return;
 	}
 	
 	if (/webOS\//.test(ua)){
-		
+		console.log("Caso WEBOS");
+		return;
 	}
 	
 	if (/(Intel|PPC) Mac OS X/.test(ua)){
-		//var hostname = req.headers.host;
-		var hostname = "192.241.187.135";
+		console.log("Caso INTEL PPC MACOSX");
 		res.redirect('http://'+hostname+':3000/#/account_activation/'+data.type+'/'+data.email);
+		return;
 	}
 	
 	if (/Windows NT/.test(ua)){
+		console.log("Caso WINDOWS NT");
 		res.redirect('http://'+hostname+':3000/#/account_activation/'+data.type+'/'+data.email);
+		return;
 	}	
 };
 //Email Verifier//
@@ -1888,8 +1894,6 @@ var emailVerification = function (req,data,type){
 	var token = security.encrypt(data.email);
 	var tokenB64 = security.base64(token);
 	var emailB64 = security.base64(data.email);
-	//var hostname = req.headers.host;
-	var hostname = "192.241.187.135";
 	var url = 'http://'+hostname+':1414/api_1.0/Account/Verify/'+type+'/'+emailB64+'/'+tokenB64;
 				mail.send("Verifica tu cuenta", "Hola "+data.name+"!. <br>Estás a solo un paso de ser parte de DocLinea!  Verifica tu cuenta haciendo click en el siguiente botón:<br> <a href='"+url+"'> Verificar </a><br>Saludos! Tu equipo DocLinea.", data.email);
 };
@@ -1921,8 +1925,6 @@ exports.passwordRedirect = function (req, res){
 	}
 	
 	if (/(Intel|PPC) Mac OS X/.test(ua)){
-		//var hostname = req.headers.host;
-		var hostname = "192.241.187.135";
 		res.redirect('http://'+hostname+':3000/#/NewPassword/'+req.params.token+'/'+req.params.type+'/'+req.params.request+'/'+req.params.email);
 	}
 	
