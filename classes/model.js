@@ -1552,7 +1552,7 @@ exports.verifyAccount= function(req,res){
 						var url = 'http://'+hostname+':3000';
 						//var url2= "doclinea://?token="+tokenB64+"&type=doctor&request=new_password";
 						if(!checkIfConfirmed){
-							mail.send("Cuenta Activada", mail_template.doctor_new_account(doctor,url), doctor.email);
+							mail.send("!Bienvenido a DocLinea!", mail_template.doctor_new_account(doctor,url), doctor.email);
 						}
 						
 						var data = {};
@@ -1566,6 +1566,7 @@ exports.verifyAccount= function(req,res){
 	});
 	}
 	else if(req.params.type == "user"){
+		console.log("In verify");
 		User.findOne({email:email_decoded},function(err,user){
 			if(!user){
 				res.json({status: false, error: "not found"});
@@ -1585,7 +1586,7 @@ exports.verifyAccount= function(req,res){
 							var url = 'http://'+hostname+':3000';
 							//var url2= "doclinea://?token="+tokenB64+"&type=doctor&request=new_password";
 							if(!checkIfConfirmed){
-								mail.send("!Bienvenido a DocLinea!", mail_template.user_new_account(doctor,url), user.email);
+								mail.send("!Bienvenido a DocLinea!", mail_template.user_new_account(user,url), user.email);
 							}
 							
 							var data = {};

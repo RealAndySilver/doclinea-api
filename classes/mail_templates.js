@@ -4,8 +4,8 @@ exports.doctor_new_account = function(object,url) {
 	"<p>Gracias por ser parte de DocLinea.  </p>"+
 	"<p>A través de nuestra tecnología, usted brindará una mejor experiencia de atención en salud para sus pacientes.</p>"+
 	"<p>Con DocLinea:</p>"+
-	"<p>Aumentará el número de pacientes en su consultorio.<br>"+
 	"<ul>"+
+	"<li>Aumentará el número de pacientes en su consultorio.</li>"+
 	"<li>Tendrá una agenda online, en la cual puede administrar sus citas sin complicaciones, desde cualquier lugar y en cualquier momento</li>"+
 	"<li>Sus pacientes podrán reservar citas las 24 horas / 7 días de la semana</li>"+
 	"<li>Podrá cancelar y reprogramar sus citas.</li>"+
