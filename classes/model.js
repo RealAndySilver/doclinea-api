@@ -25,9 +25,9 @@ var exclude = {/*password:0*/};
 var verifyEmailVar = false;
 
 //Producción
-//var hostname = "192.241.187.135";
+var hostname = "192.241.187.135";
 //Dev
-var hostname = "192.168.0.32";
+//var hostname = "192.168.0.32";
 
 //////////////////////////////////
 //End of Global Vars//////////////
