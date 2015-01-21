@@ -27,3 +27,8 @@ exports.user_new_account = function(object,url) {
 	var result = "Hola "+object.name+". <br>DocLinea te permite encontrar y reservar citas con Doctores <b>al instante, en línea, cerca de ti y totalmente Gratis!</b><br> Con DocLinea puedes visualizar, reprogramar o cancelar tus citas en cualquier momento, 24 horas/ 7 días a la semana.<br> Tu Usuario: "+ object.email+"<br> Reserva ya tu próxima cita médica! <a href='"+url+"'> Doclinea </a><br>Saludos! Tu Equipo DocLinea";
 	return result;
 }
+
+exports.email_verification = function(object,url) {
+	var result = "Hola "+object.name+"!. <br>Estás a solo un paso de ser parte de DocLinea!  Verifica tu cuenta haciendo click en el siguiente botón:<br> <a href='"+url+"'> Verificar </a><br>Saludos! Tu equipo DocLinea.";
+	return result;
+}

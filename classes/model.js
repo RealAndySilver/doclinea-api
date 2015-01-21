@@ -8,7 +8,6 @@ var utils = require('../classes/utils');
 var mail = require('../classes/mail_sender');
 var mail_template = require('../classes/mail_templates');
 var fs = require('fs');
-mongoose.connect("mongodb://iAmUser:iAmStudio1@ds061199.mongolab.com:61199/doclinea");
 var express = require('express');
 var knox = require('knox');
 var gcm = require('node-gcm');
@@ -16,6 +15,14 @@ var	security = require('../classes/security');
 var colors = require('colors');
 //////////////////////////////////
 //End of Dependencies/////////////
+//////////////////////////////////
+
+//////////////////////////////////
+//MongoDB Connection /////////////
+//////////////////////////////////
+mongoose.connect("mongodb://iAmUser:iAmStudio1@ds061199.mongolab.com:61199/doclinea");
+//////////////////////////////////
+//End of MongoDB Connection///////
 //////////////////////////////////
 
 //////////////////////////////////
@@ -27,7 +34,7 @@ var verifyEmailVar = false;
 //Producción
 var hostname = "192.241.187.135";
 //Dev
-//var hostname = "192.168.0.32";
+//var hostname = "192.168.0.37";
 
 //////////////////////////////////
 //End of Global Vars//////////////
@@ -41,9 +48,52 @@ var ReasonSchema = new mongoose.Schema({reason:String});
 var Device = new mongoose.Schema({type:String, os:String, token:String, name:String}, {_id:false});
 var Education = new mongoose.Schema({institute_name:String, degree:String, year_start:String, year_end:String, hilights:String}, {_id:false});
 var Settings = new mongoose.Schema({email_appointment_notifications:Boolean, email_marketing_notifications:Boolean, mobile_appointment_notifications:Boolean, mobile_marketing_notifications:Boolean}, {_id:false});
-
 //////////////////////////////////
 //End SubDocumentSchema///////////
+//////////////////////////////////
+
+//////////////////////////////////
+//HomePage Schema/////////////////
+//////////////////////////////////
+var HomePageSchema= new mongoose.Schema({
+	section0_register_text: {type: String},
+	section0_login_text: {type: String},
+	section1_left_title: {type: String},
+	section1_left_paragraph1: {type: String},
+	section1_left_paragraph2: {type: String},
+	section1_left_paragraph3: {type: String},
+	section1_mobile_title: {type: String},
+	section1_appstore_link: {type: String},
+	section1_googleplay_link: {type: String},
+	section1_find_doctor_button: {type: String},
+	section2_left_title: {type: String},
+	section2_left_paragraph: {type: String},
+	section2_center_title: {type: String},
+	section2_center_paragraph: {type: String},
+	section2_right_title: {type: String},
+	section2_right_paragraph: {type: String},
+	section3_title: {type: String},
+	section4_left_title: {type: String},
+	section4_left_paragraph: {type: String},
+	section4_left_button_title: {type: String},
+	section4_right_title: {type: String},
+	section4_right_paragraph: {type: String},
+	section4_right_button_title: {type: String},
+	section5_title: {type: String},
+	section5_phone: {type: String},
+	section5_email: {type: String},
+	section5_contact_button: {type: String},
+	section6_follow_title: {type: String},
+	section6_facebook_link: {type: String},
+	section6_twitter_link: {type: String},
+	section6_google_link: {type: String},
+	section6_linkedin_link: {type: String},
+	section6_youtube_link: {type: String},
+	section7_footer_text: {type: String},
+}),
+	HomePage= mongoose.model('HomePage',HomePageSchema);
+//////////////////////////////////
+//End HomePage Schema ////////////
 //////////////////////////////////
 
 //////////////////////////////////
@@ -68,6 +118,7 @@ var UserSchema= new mongoose.Schema({
 	email : {type: String, required:true, unique:true,},
 	password : {type: String, required:true},
 	password_recover : {status: {type: Boolean}, token:{type:String}},
+	birthday : {type: Date, required: false},
 	email_confirmation : {type: Boolean, required:true},
 	name : {type: String, required:true},
 	lastname : {type: String, required:false},
@@ -99,6 +150,7 @@ var UserSchema= new mongoose.Schema({
 var DoctorSchema= new mongoose.Schema({
 	name : {type: String, required:true},
 	password : {type: String, required:true},
+	birthday : {type: Date, required:false},
 	password_recover : {status: {type: Boolean}, token:{type:String}},
 	lastname : {type: String, required:true},
 	email : {type: String, required:true, unique:true,},
@@ -361,17 +413,27 @@ exports.deleteAdmin = function(req,res){
 //////////////////////////////////
 //User CRUD starts here//////////
 //////////////////////////////////
-//Create
+//Create*
 exports.createUser = function(req,res){
+//Esta función crea un usuario nuevo a partir de una peticion POST
 var device_array = [];
+
+//Revisamos la información que llega y la parseamos en un formato json conocido
 if(req.body.device_info){
 	req.body.device_info = utils.isJson(req.body.device_info) ? JSON.parse(req.body.device_info): req.body.device_info ;
 	device_array.push(req.body.device_info);
 }
+
+//Procedemos a crear el usuario en la base de datos con la información que llega en el POST
 utils.log("User/Create","Recibo:",JSON.stringify(req.body));
 	new User({
 		email : req.body.email,
+		birthday: req.body.birthday,
+		//El estado inicial de confirmación email debe ser false
+		//Este se trabaja con una variable global al principio de este documento
 		email_confirmation : verifyEmailVar,
+		//////////////////////////////////////
+		//////////////////////////////////////
 		password : req.body.password,
 		name : req.body.name,
 		lastname : req.body.lastname,
@@ -389,14 +451,17 @@ utils.log("User/Create","Recibo:",JSON.stringify(req.body));
 			res.json(err);
 		}
 		else{
+			//Una vez creado el documento en la base de datos procedemos a enviar un email
+			//de confirmación
 			emailVerification(req,user,'user');
 			utils.log("User/Create","Envío:",JSON.stringify(user));
 			res.json({status: true, message: "Usuario creado exitosamente. Proceder a activar la cuenta.", response: user});
 		}
 	});
 };
-//Read One
+//Read One*
 exports.getUserByEmail = function(req,res){
+	//Esta función expone un servicio para buscar un usuario por email
 	User.findOne({email:req.params.email},exclude,function(err,user){
 		if(!user){
 			res.json({status: false, error: "not found"});
@@ -407,6 +472,7 @@ exports.getUserByEmail = function(req,res){
 	});
 };
 exports.getUserByID = function(req,res){
+	//Esta función expone un servicio para buscar un usuario por id
 	User.findOne({_id:req.params.id},exclude,function(err,user){
 		if(!user){
 			res.json({status: false, error: "not found"});
@@ -416,10 +482,18 @@ exports.getUserByID = function(req,res){
 		}
 	});
 };
+//Login*
 exports.authenticateUser = function(req,res){
-utils.log("User/Authenticate","Recibo:",JSON.stringify(req.body));
+//Esta función permite verificar la autenticidad del usuario por medio de un mail y un password
+//Además de esto, si el usuario está en la versión móvil, nos permite capturar información 
+//importante sobre su dispositivo
+
+/*Log*/utils.log("User/Authenticate","Recibo:",JSON.stringify(req.body));
+
+	//Buscamos inicialmente que la cuenta del usuario exista
 	User.findOne({email:req.body.email},exclude,function(err,user){
 		if(!user){
+			//No existe
 			res.json({status: false, error: "not found", error_id:0});
 		}
 		else{
@@ -428,61 +502,83 @@ utils.log("User/Authenticate","Recibo:",JSON.stringify(req.body));
 				//Acá se verifica si llega device info, y se agrega al device list del usuario
 				//En este punto ya se encuentra autenticado el usuario, las respuestas siempre serán positivas
 				if(req.body.device_info){
-					utils.log("User/Authenticate","Envío:",JSON.stringify(user));
+					//En caso que recibamos información sobre el dispositivo
+					//procedemos a parsear esta información en un formato json conocido
+					/*Log*/utils.log("User/Authenticate","Envío:",JSON.stringify(user));
 					req.body.device_info = utils.isJson(req.body.device_info) ? JSON.parse(req.body.device_info): req.body.device_info ;
+					
+					//Procedemos a guardar esta información dentro del documento
 					User.findOneAndUpdate({email:req.body.email}, {$addToSet:{devices:req.body.device_info}}, function(err,new_user){
+						//Si no hay ningún error al guardar el device_info
 						if(!err){
 							if(!new_user){
+								//Verificamos que el usuario ya haya verificado su cuenta
+								//por medio del email que enviamos
 								if(user.email_confirmation){
-									utils.log("User/Authenticate","Envío:",JSON.stringify(user));
+									/*Log*/utils.log("User/Authenticate","Envío:",JSON.stringify(user));
 									res.json({status: true, response: user, message:"Autenticado correctamente, pero no se pudo agregar el dispositivo"});
 								}
+								//Si no está verificado negamos el login
 								else{
 									utils.log("User/Authenticate","Envío:","Email no confirmado");
 									res.json({status: false, error: "User not confirmed. Please confirm by email", error_id:1});
 								}						
 							}
 							else{
+								//Verificamos que el usuario ya haya verificado su cuenta
+								//por medio del email que enviamos
 								if(user.email_confirmation){
-									utils.log("User/Authenticate","Envío:",JSON.stringify(user));
+									/*Log*/utils.log("User/Authenticate","Envío:",JSON.stringify(user));
 									res.json({status: true, response: new_user});
 								}
+								//Si no está verificado negamos el login
 								else{
 									utils.log("User/Authenticate","Envío:","Email no confirmado");
 									res.json({status: false, error: "User not confirmed. Please confirm by email", error_id:1});
 								}
 							}
 						}
+						//Hubo error al guardar el device_info
+						//Por lo tanto, esta información no quedará en el documento
 						else{
+							//Verificamos que el usuario ya haya verificado su cuenta
+							//por medio del email que enviamos
 							if(user.email_confirmation){
-								utils.log("User/Authenticate","Envío:",JSON.stringify(user));
+								/*Log*/utils.log("User/Authenticate","Envío:",JSON.stringify(user));
 								res.json({status: true, response: user, message:"Autenticado correctamente, pero ocurrió un error.", error:err});
 							}
+							//Si no está verificado negamos el login
 							else{
-								utils.log("User/Authenticate","Envío:","Email no confirmado");
+								/*Log*/utils.log("User/Authenticate","Envío:","Email no confirmado");
 								res.json({status: false, error: "User not confirmed. Please confirm by email", error_id:1});
 							}
 						}
 					});
 				}
+				//No hay device info, así que esta sección pertenece a la app web
 				else{
+					//Verificamos que el usuario ya haya verificado su cuenta
+					//por medio del email que enviamos
 					if(user.email_confirmation){
 						res.json({status: true, response: user});
 					}
+					//Si no está verificado negamos el login
 					else{
-						utils.log("User/Authenticate","Envío:","Email no confirmado");
+						/*Log*/utils.log("User/Authenticate","Envío:","Email no confirmado");
 						res.json({status: false, error: "User not confirmed. Please confirm by email", error_id:1});
 					}
 				}
 			}
+			//No se encontró el user
 			else{
 				res.json({status: false, error: "not found"});
 			}
 		}
 	});
 };
-//Read All
+//Read All*
 exports.getAllUsers = function(req,res){
+	//Esta función expone un servicio para buscar todos los usuarios sin ningún criterio de búsqueda
 	User.find({},exclude,function(err,users){
 		if(err){
 			res.json({status: false, error: "not found"});
@@ -492,31 +588,46 @@ exports.getAllUsers = function(req,res){
 		}
 	});
 };
-//Update
+//Update*
 exports.updateUser = function(req,res){
-utils.log("User/Update","Recibo sin filtro:",JSON.stringify(req.body));
+//Esta función actualiza la información del usuario por medio de un POST
+
+/*Log*/utils.log("User/Update","Recibo sin filtro:",JSON.stringify(req.body));
+
+//Cómo medida de seguridad
+//Eliminamos los parámetros _id y email que 
+//vienen del POST para evitar que se sobreescriban
 req.body._id = '';
 req.body.email = '';
+
+//Parseamos los settings que llegan en un formato JSON conocido
 if(req.body.settings){
 	req.body.settings = utils.isJson(req.body.settings) ? JSON.parse(req.body.settings): req.body.settings ;
 }
+
+//Filtramos el body del POST para remover parámetros vacíos
+//ya que la actualización se realiza de manera dinámica
 var filtered_body = utils.remove_empty(req.body);
-utils.log("User/Update","Recibo:",JSON.stringify(filtered_body));
+
+/*Log*/utils.log("User/Update","Recibo:",JSON.stringify(filtered_body));
+	
+	//Buscamos el usuario que se desea actualizar por medio de su _id
 	User.findOneAndUpdate({_id:req.params.user_id},
+		//Seteamos el nuevo contenido
 	   {$set:filtered_body}, 
 	   	function(err,user){
 	   	if(!user){
 		   	res.json({status: false, error: "not found"});
 	   	}
 	   	else{
-	   		utils.log("User/Create","Envío:",JSON.stringify(user));
+	   		/*Log*/utils.log("User/Create","Envío:",JSON.stringify(user));
 		   	res.json({status:true, message:"Usuario actualizado exitosamente.", response:user});
 	   	}
 	});
 };
 //Password
 exports.requestRecoverUser = function(req,res){
-	utils.log("User/Recover","Recibo:",req.params.user_email);
+	/*Log*/utils.log("User/Recover","Recibo:",req.params.user_email);
 	User.findOne({email:req.params.user_email},function(err,user){
 		if(!user){
 			res.json({status: false, error: "not found"});
@@ -531,7 +642,6 @@ exports.requestRecoverUser = function(req,res){
 				}
 				else{
 					if(result){
-						//mail.send("Token: "+token, doctor.email);
 						var url = 'http://'+hostname+'/api_1.0/Password/Redirect/user/'+user.email+'/new_password/'+tokenB64;
 						//var url2= "doclinea://?token="+tokenB64+"&type=doctor&request=new_password";
 						mail.send("Recuperar Contraseña", 
@@ -546,7 +656,7 @@ exports.requestRecoverUser = function(req,res){
 };
 exports.newPasswordUser = function(req,res){
 	var token_decoded = security.decodeBase64(req.params.token);
-	utils.log("User/NewPassword","Recibo:",token_decoded);
+	/*Log*/utils.log("User/NewPassword","Recibo:",token_decoded);
 	User.findOne({password_recover:{status:true, token: token_decoded}},function(err,user){
 		if(!user){
 			res.json({status: false, error: "not found"});
@@ -571,7 +681,7 @@ exports.newPasswordUser = function(req,res){
 	});
 };
 exports.changePasswordUser = function(req,res){
-utils.log("User/ChangePassword","Recibo:",JSON.stringify(req.body));
+/*Log*/utils.log("User/ChangePassword","Recibo:",JSON.stringify(req.body));
 	User.findOne({_id:req.params.user_id},function(err,user){
 		if(!user){
 			res.json({status: false, error: "not found"});
@@ -584,11 +694,11 @@ utils.log("User/ChangePassword","Recibo:",JSON.stringify(req.body));
 				user.password = security.encrypt(req.body.new_password);
 				user.save(function(err, result){
 					if(err){
-						utils.log("User/ChangePassword","Error:",JSON.stringify(err));
+						/*Log*/utils.log("User/ChangePassword","Error:",JSON.stringify(err));
 						res.json({status: false, error: err, message: "Ocurrió un error al actualizar la contraseña."});
 					}
 					else{
-						utils.log("User/ChangePassword","Envío:",JSON.stringify(user));
+						/*Log*/utils.log("User/ChangePassword","Envío:",JSON.stringify(user));
 						res.json({status: true, response: user, message: "Contraseña actualizada exitosamente."});
 					}
 				});			
@@ -619,7 +729,7 @@ exports.deleteUser = function(req,res){
 //////////////////////////////////////
 //Create
 exports.createDoctor = function(req,res){
-utils.log("Doctor/Create","Recibo:",JSON.stringify(req.body));
+/*Log*/utils.log("Doctor/Create","Recibo:",JSON.stringify(req.body));
 
 var location_list = [];
 var location = {};
@@ -642,6 +752,7 @@ var practice_list = [];
 practice_list.push(req.body.practice_list);
 	new Doctor({
 		name : req.body.name,
+		birthday: req.body.birthday,
 		status : false,
 		password : req.body.password,
 		lastname : req.body.lastname,
@@ -664,20 +775,20 @@ practice_list.push(req.body.practice_list);
 		}
 		else{
 			emailVerification(req,doctor,'doctor');
-			utils.log("Doctor/Create","Envío:",JSON.stringify(doctor));
+			/*Log*/utils.log("Doctor/Create","Envío:",JSON.stringify(doctor));
 			res.json({status: true, message: "Doctor creado exitosamente. Proceder a activar la cuenta.", response: doctor});
 		}
 	});
 };
 
 exports.addPicToGallery = function(req,res){
-utils.log("User/AddPicToGallery","Recibo:",JSON.stringify(req.body));
+/*Log*/utils.log("User/AddPicToGallery","Recibo:",JSON.stringify(req.body));
 	Doctor.findOne({_id:req.params.doctor_id},exclude,function(err,doctor){
 		if(!doctor){
 			res.json({status: false, error: "not found"});
 		}
 		else{
-			utils.log("User/AddPicToGallery","Envio:",JSON.stringify(doctor));
+			/*Log*/utils.log("User/AddPicToGallery","Envio:",JSON.stringify(doctor));
 			uploadImage(req.files.image,doctor,"gallery", 'doctor');
 			res.json({status: true, response: 'update in progress, get doctor again to see results'})
 		}
@@ -695,13 +806,13 @@ exports.getDoctorByEmail = function(req,res){
 	});
 };
 exports.getDoctorByID = function(req,res){
-utils.log("User/GetByID","Recibo:",JSON.stringify(req.body));
+/*Log*/utils.log("User/GetByID","Recibo:",JSON.stringify(req.body));
 	Doctor.findOne({_id:req.params.id},exclude,function(err,doctor){
 		if(!doctor){
 			res.json({status: false, error: "not found"});
 		}
 		else{
-			utils.log("User/GetByID","Envío:",JSON.stringify(doctor));
+			/*Log*/utils.log("User/GetByID","Envío:",JSON.stringify(doctor));
 			res.json({status: true, response: doctor});
 		}
 	});
@@ -761,7 +872,7 @@ if(query.lastname){
 }
 delete query.lat;
 delete query.lon;
-utils.log("User/GetByParams","Recibo:",JSON.stringify(query));
+/*Log*/utils.log("User/GetByParams","Recibo:",JSON.stringify(query));
 	Doctor.find(query,
 		exclude,
 		function(err,doctors){
@@ -770,7 +881,7 @@ utils.log("User/GetByParams","Recibo:",JSON.stringify(query));
 				res.json({status: false, error: "not found"});
 			}
 			else{
-				utils.log("User/GetByParams","Envío:",JSON.stringify(doctors));
+				/*Log*/utils.log("User/GetByParams","Envío:",JSON.stringify(doctors));
 				res.json({status: true, response: doctors});
 			}
 		}
@@ -875,7 +986,7 @@ if (req.body.profesional_membership){
 ///////////////////////////////////////////////////////////////////////////
 
 
-utils.log("Doctor/Update","Recibo:",JSON.stringify(filtered_body));
+/*Log*/utils.log("Doctor/Update","Recibo:",JSON.stringify(filtered_body));
 
 	Doctor.findOneAndUpdate({_id:req.params.doctor_id},
 	   {$set:filtered_body},
@@ -884,27 +995,27 @@ utils.log("Doctor/Update","Recibo:",JSON.stringify(filtered_body));
 		   	res.json({status: false, error: "not found"});
 	   	}
 	   	else{
-	   		utils.log("Doctor/Update","Envío:",JSON.stringify(doctor));
+	   		/*Log*/utils.log("Doctor/Update","Envío:",JSON.stringify(doctor));
 		   	res.json({status:true, message:"Doctor actualizado exitosamente.", response:doctor});
 	   	}
 	});
 };
 exports.updateProfilePic = function(req,res){
-utils.log("Doctor/UpdateProfilePic","Recibo:",JSON.stringify(req.files));
+/*Log*/utils.log("Doctor/UpdateProfilePic","Recibo:",JSON.stringify(req.files));
 
 	Doctor.findOne({_id:req.params.doctor_id},exclude,function(err,doctor){
 		if(!doctor){
 			res.json({status: false, error: "not found"});
 		}
 		else{
-			utils.log("Doctor/UpdateProfilePic","Envío:",JSON.stringify(doctor));
+			/*Log*/utils.log("Doctor/UpdateProfilePic","Envío:",JSON.stringify(doctor));
 			uploadImage(req.files.image,doctor,"profile", 'doctor');
 			res.json({status: true, response: 'update in progress, get doctor again to see results'})
 		}
 	});
 };
 exports.authenticateDoctor = function(req,res){
-utils.log("Doctor/Authenticate","Recibo:",JSON.stringify(req.body));
+/*Log*/utils.log("Doctor/Authenticate","Recibo:",JSON.stringify(req.body));
 	Doctor.findOne({email:req.body.email},exclude,function(err,doctor){
 		if(!doctor){
 			res.json({status: false, error: "not found", error_id:0});//0 doctor not found
@@ -913,7 +1024,7 @@ utils.log("Doctor/Authenticate","Recibo:",JSON.stringify(req.body));
 			//Verificamos que el hash guardado en password sea igual al password de entrada
 			if(security.compareHash(req.body.password, doctor.password)){
 				if(doctor.email_confirmation){
-					utils.log("Doctor/Authenticate","Envío:",JSON.stringify(doctor));
+					/*Log*/utils.log("Doctor/Authenticate","Envío:",JSON.stringify(doctor));
 					doctor.password_recover.status = false;
 					doctor.password_recover.token = "";
 					doctor.save(function(err, result){
@@ -921,7 +1032,7 @@ utils.log("Doctor/Authenticate","Recibo:",JSON.stringify(req.body));
 					});
 				}
 				else{
-					utils.log("Doctor/Authenticate","Envío:","Email no confirmado");
+					/*Log*/utils.log("Doctor/Authenticate","Envío:","Email no confirmado");
 					res.json({status: false, error: "Doctor not confirmed. Please confirm by email", error_id:1});//1 doctor not confirmed 
 				}
 				
@@ -934,7 +1045,7 @@ utils.log("Doctor/Authenticate","Recibo:",JSON.stringify(req.body));
 };
 //Password
 exports.requestRecoverDoctor = function(req,res){
-	utils.log("Doctor/Recover","Recibo:",req.params.doctor_email);
+	/*Log*/utils.log("Doctor/Recover","Recibo:",req.params.doctor_email);
 	Doctor.findOne({email:req.params.doctor_email},function(err,doctor){
 		if(!doctor){
 			res.json({status: false, error: "not found"});
@@ -964,7 +1075,7 @@ exports.requestRecoverDoctor = function(req,res){
 };
 exports.newPasswordDoctor = function(req,res){
 	var token_decoded = security.decodeBase64(req.params.token);
-	utils.log("Doctor/NewPassword","Recibo:",token_decoded);
+	/*Log*/utils.log("Doctor/NewPassword","Recibo:",token_decoded);
 	Doctor.findOne({password_recover:{status:true, token: token_decoded}},function(err,doctor){
 		if(!doctor){
 			res.json({status: false, error: "not found"});
@@ -979,7 +1090,6 @@ exports.newPasswordDoctor = function(req,res){
 				}
 				else{
 					if(result){
-						//mail.send("Clave Cambiada Con Exito");
 						mail.send("Clave Cambiada Con Exito!", "Hola "+doctor.name+". <br>Tu contraseña ha sido cambiada con éxito. Ingresa ya a Doclinea:<br> <a href='http://doclinea.com'> Doclinea </a>", doctor.email);
 						res.json({status: true, response: result});
 					}
@@ -989,7 +1099,7 @@ exports.newPasswordDoctor = function(req,res){
 	});
 };
 exports.changePasswordDoctor = function(req,res){
-utils.log("Doctor/ChangePassword","Recibo:",JSON.stringify(req.body));
+/*Log*/utils.log("Doctor/ChangePassword","Recibo:",JSON.stringify(req.body));
 	Doctor.findOne({_id:req.params.doctor_id},function(err,doctor){
 		if(!doctor){
 			res.json({status: false, error: "not found"});
@@ -1002,11 +1112,11 @@ utils.log("Doctor/ChangePassword","Recibo:",JSON.stringify(req.body));
 				doctor.password = security.encrypt(req.body.new_password);
 				doctor.save(function(err, result){
 					if(err){
-						utils.log("Doctor/ChangePassword","Error:",JSON.stringify(err));
+						/*Log*/utils.log("Doctor/ChangePassword","Error:",JSON.stringify(err));
 						res.json({status: false, error: err, message: "Ocurrió un error al actualizar la contraseña."});
 					}
 					else{
-						utils.log("User/ChangePassword","Envío:",JSON.stringify(doctor));
+						/*Log*/utils.log("User/ChangePassword","Envío:",JSON.stringify(doctor));
 						res.json({status: true, response: doctor, message: "Contraseña actualizada exitosamente."});
 					}
 				});			
@@ -1020,7 +1130,7 @@ utils.log("Doctor/ChangePassword","Recibo:",JSON.stringify(req.body));
 
 //Delete
 exports.removeGalleryPic = function(req,res){
-	utils.log("Doctor/RemoveGalleryPic","Recibo:",JSON.stringify(req.body));
+	/*Log*/utils.log("Doctor/RemoveGalleryPic","Recibo:",JSON.stringify(req.body));
 	Doctor.findOneAndUpdate(
 	    {_id: req.params.doctor_id},
 	    {$pull: {gallery: {name:req.body.name}}},
@@ -1030,7 +1140,7 @@ exports.removeGalleryPic = function(req,res){
 		    	res.json({status:false, message: 'Error al borrar'});
 	    	}
 	    	else{
-				utils.log("Doctor/RemoveGalleryPic","Envío:",JSON.stringify(doctor));
+				/*Log*/utils.log("Doctor/RemoveGalleryPic","Envío:",JSON.stringify(doctor));
 	        	res.json({status:true, message: 'Borrado' ,response:doctor});
 	    	}
 	    }
@@ -1120,7 +1230,7 @@ exports.updateHospital = function(req,res){
 		req.body.location_list = utils.isJson(req.body.location_list) ? JSON.parse(req.body.location_list): req.body.location_list ;
 	}
 	var filtered_body = utils.remove_empty(req.body);
-	utils.log("Hospital/Update","Recibo:",JSON.stringify(req.body));
+	/*Log*/utils.log("Hospital/Update","Recibo:",JSON.stringify(req.body));
 	Hospital.findOneAndUpdate({_id:req.params.hospital_id},
 	   {$set:filtered_body}, 
 	   	function(err,hospital){
@@ -1128,19 +1238,19 @@ exports.updateHospital = function(req,res){
 		   	res.json({status: false, error: "not found"});
 	   	}
 	   	else{
-		   	utils.log("Hospital/Update","Envío:",JSON.stringify(hospital));
+		   	/*Log*/utils.log("Hospital/Update","Envío:",JSON.stringify(hospital));
 		   	res.json({status:true, message:"Hospital actualizado exitosamente."});
 	   	}
 	});
 };
 exports.updateHospitalPic = function(req,res){
-utils.log("Hospital/UpdatePic","Recibo:",JSON.stringify(req.files));
+/*Log*/utils.log("Hospital/UpdatePic","Recibo:",JSON.stringify(req.files));
 	Hospital.findOne({_id:req.params.hospital_id},exclude,function(err,hospital){
 		if(!hospital){
 			res.json({status: false, error: "not found"});
 		}
 		else{
-			utils.log("Hospital/UpdatePic","Envío:",JSON.stringify(hospital));
+			/*Log*/utils.log("Hospital/UpdatePic","Envío:",JSON.stringify(hospital));
 			uploadImage(req.files.image,hospital,"profile", 'hospital');
 			res.json({status: true, response: 'update in progress, get hostpital again to see results'})
 		}
@@ -1166,7 +1276,7 @@ exports.deleteHospital = function(req,res){
 //////////////////////////////////////
 //Create
 exports.createInsuranceCompany = function(req,res){
-utils.log("InsuranceCompany/Create","Recibo:",JSON.stringify(req.body));
+/*Log*/utils.log("InsuranceCompany/Create","Recibo:",JSON.stringify(req.body));
 	new InsuranceCompany({
 		name : req.body.name,
 		email : req.body.email,
@@ -1236,13 +1346,13 @@ var filtered_body = utils.remove_empty(req.body);
 	});
 };
 exports.updateInsuranceCompanyPic = function(req,res){
-utils.log("InsuranceCompany/UpdatePic","Recibo:",JSON.stringify(req.files));
+/*Log*/utils.log("InsuranceCompany/UpdatePic","Recibo:",JSON.stringify(req.files));
 	InsuranceCompany.findOne({_id:req.params.insurancecompany_id},exclude,function(err,insurancecompany){
 		if(!insurancecompany){
 			res.json({status: false, error: "not found"});
 		}
 		else{
-			utils.log("InsuranceCompany/UpdatePic","Envío:",JSON.stringify(insurancecompany));
+			/*Log*/utils.log("InsuranceCompany/UpdatePic","Envío:",JSON.stringify(insurancecompany));
 			uploadImage(req.files.image,insurancecompany,"profile", 'insurancecompany');
 			res.json({status: true, response: 'update in progress, get insurancecompany again to see results'})
 		}
@@ -1473,7 +1583,7 @@ exports.getAllAppointmentsForUser = function(req,res){
 //Update
 exports.takeAppointment = function(req,res){
 var filtered_body = utils.remove_empty(req.body);
-	utils.log("Appointment/Take","Recibo:",JSON.stringify(req.body));
+	/*Log*/utils.log("Appointment/Take","Recibo:",JSON.stringify(req.body));
 	Appointment.findOneAndUpdate({_id:req.params.appointment_id},
 	   {$set:{status: "taken", user_id:filtered_body.user_id, user_name: filtered_body.user_name}}, 
 	   	function(err,appointment){
@@ -1481,14 +1591,14 @@ var filtered_body = utils.remove_empty(req.body);
 		   	res.json({status: false, error: "not found"});
 	   	}
 	   	else{
-		   	utils.log("Appointment/Update","Envío:",JSON.stringify(appointment));
+		   	/*Log*/utils.log("Appointment/Update","Envío:",JSON.stringify(appointment));
 		   	res.json({status:true, message:"Cita actualizado exitosamente."});
 	   	}
 	});
 };
 exports.updateAppointment = function(req,res){
 var filtered_body = utils.remove_empty(req.body);
-	utils.log("Appointment/Update","Recibo:",JSON.stringify(req.body));
+	/*Log*/utils.log("Appointment/Update","Recibo:",JSON.stringify(req.body));
 	Appointment.findOneAndUpdate({_id:req.params.appointment_id},
 	   {$set:filtered_body}, 
 	   	function(err,appointment){
@@ -1496,19 +1606,19 @@ var filtered_body = utils.remove_empty(req.body);
 		   	res.json({status: false, error: "not found"});
 	   	}
 	   	else{
-		   	utils.log("Appointment/Update","Envío:",JSON.stringify(appointment));
+		   	/*Log*/utils.log("Appointment/Update","Envío:",JSON.stringify(appointment));
 		   	res.json({status:true, message:"Cita actualizado exitosamente."});
 	   	}
 	});
 };
 exports.updateHospitalPic = function(req,res){
-utils.log("Hospital/UpdatePic","Recibo:",JSON.stringify(req.files));
+/*Log*/utils.log("Hospital/UpdatePic","Recibo:",JSON.stringify(req.files));
 	Hospital.findOne({_id:req.params.hospital_id},exclude,function(err,hospital){
 		if(!hospital){
 			res.json({status: false, error: "not found"});
 		}
 		else{
-			utils.log("Hospital/UpdatePic","Envío:",JSON.stringify(hospital));
+			/*Log*/utils.log("Hospital/UpdatePic","Envío:",JSON.stringify(hospital));
 			uploadImage(req.files.image,hospital,"profile", 'hospital');
 			res.json({status: true, response: 'update in progress, get hostpital again to see results'})
 		}
@@ -1534,7 +1644,7 @@ exports.deleteHospital = function(req,res){
 //////////////////////////////////
 //Verify
 exports.verifyAccount= function(req,res){
-	utils.log("Account/Verify/"+req.params.type,"Recibo:",req.params.emailb64);
+	/*Log*/utils.log("Account/Verify/"+req.params.type,"Recibo:",req.params.emailb64);
 	var email_decoded = security.decodeBase64(req.params.emailb64);
 	if(req.params.type == "doctor"){
 		Doctor.findOne({email:email_decoded},function(err,doctor){
@@ -1550,9 +1660,7 @@ exports.verifyAccount= function(req,res){
 				}
 				else{
 					if(result){
-						//mail.send("Token: "+token, doctor.email);
 						var url = 'http://'+hostname+':3000';
-						//var url2= "doclinea://?token="+tokenB64+"&type=doctor&request=new_password";
 						if(!checkIfConfirmed){
 							mail.send("!Bienvenido a DocLinea!", mail_template.doctor_new_account(doctor,url), doctor.email);
 						}
@@ -1568,7 +1676,6 @@ exports.verifyAccount= function(req,res){
 	});
 	}
 	else if(req.params.type == "user"){
-		console.log("In verify");
 		User.findOne({email:email_decoded},function(err,user){
 			if(!user){
 				res.json({status: false, error: "not found"});
@@ -1582,9 +1689,7 @@ exports.verifyAccount= function(req,res){
 					}
 					else{
 						if(result){
-							//mail.send("Token: "+token, doctor.email);
 							var url = 'http://'+hostname+':3000';
-							//var url2= "doclinea://?token="+tokenB64+"&type=doctor&request=new_password";
 							if(!checkIfConfirmed){
 								mail.send("!Bienvenido a DocLinea!", mail_template.user_new_account(user,url), user.email);
 							}
@@ -1601,7 +1706,7 @@ exports.verifyAccount= function(req,res){
 	}
 };
 exports.sendEmailVerification = function(req,res){
-	utils.log("Account/SendEmailVerification","Recibo:",JSON.stringify(req.body));
+	/*Log*/utils.log("Account/SendEmailVerification","Recibo:",JSON.stringify(req.body));
 	var email_decoded = security.decodeBase64(req.params.emailb64);
 	if(email_decoded == req.body.email){
 		if(req.params.type == 'doctor'){
@@ -1772,8 +1877,9 @@ var ios = req.body.ios ? true:false;
 /////////////////////////////////
 //Functions//////////////////////
 /////////////////////////////////
-//Image Uploader//
+//Image Uploader*//
 var uploadImage = function(file,object,type,owner){
+	//Verificamos que llegue archivo adjunto
 	if(!file){
 		object.profile_pic = {name:"", image_url: ""};
 		object.save(function(err,obj){
@@ -1781,20 +1887,30 @@ var uploadImage = function(file,object,type,owner){
 		console.log('No hay archivo');
 		return;
 	} 
+	
+	//Guardamos el path de la imagen en una variable
+	//Y verificamos su extensión para proceder con el guardado adecuado
 	var tmp_path_image_url = file.path;
     var extension =".jpg";
     if(file.type=="image/png"){
     	extension=".png";
     }
-	var target_path_image_url = './public/images/' + file.size + file.name;    
+    
+    //Generamos una ruta de guardado temporal local
+	var target_path_image_url = './public/images/' + file.size + file.name;  
+	
+	//Revisamos que el tamaño del adjunto sea mayor a 0  
     if(file.size>0){
 		fs.renameSync(tmp_path_image_url,target_path_image_url);		
 		fs.stat(target_path_image_url, function(err, stat){
-		  // Be sure to handle `err`.
+		  
 			if(err){
 				console.log("error1 "+err);
 			}
 			else{
+				//Si no hay error en el proceso de guardado local
+				//Procedemos a subir el archivo al bucket con una ruta definida coherentemente
+				//Esta ruta se genera con los parámetros de entrada de la función
 				console.log("Objeto: "+object.email);
 				var req = client.put(owner+'/'+object.email+'/'+type+"/"+file.name, {
 					      'Content-Length': stat.size,
@@ -1802,6 +1918,9 @@ var uploadImage = function(file,object,type,owner){
 					      'x-amz-acl': 'public-read'
 				});
 				fs.createReadStream(target_path_image_url).pipe(req);
+				
+				//Cuando el servidor responda, procedemos a guardar la información
+				//De la imagen en la base de datos
 				req.on('response', function(res){
 					fs.unlink(target_path_image_url, function(){});
 					new Image({
@@ -1815,6 +1934,10 @@ var uploadImage = function(file,object,type,owner){
 						if(err){
 						}
 						else{
+							
+							//Procedemos a actualizar el objeto doctor, hospital, o seguro
+							//Al cual se le haya agregado la imagen
+							//El doctor tiene 2 tipos de imágenes. Perfil, y galería.
 							if(owner=="doctor"){
 								if(type=="profile"){
 									object.profile_pic = {name:image.name, image_url: image.url, id: image._id};
@@ -1833,6 +1956,8 @@ var uploadImage = function(file,object,type,owner){
 									);
 								}
 							}
+							
+							//Los hospitales y seguros sólo tienen foto de perfil
 							else if(owner == "hospital" || owner == "insurancecompany"){
 								if(type=="profile"){
 									object.logo = {name:image.name, image_url: image.url, id: image._id};
@@ -1848,14 +1973,19 @@ var uploadImage = function(file,object,type,owner){
 		});
 	}
     else{
+	    //Si el tamaño del adjunto no es mayor a 0 quiere decir que no hay adjunto
 	    console.log('no hay imagen');
     }
 }
-//Browser Account Redirect//
+//Browser Account Redirect*//
 var browserAccountRedirect = function (req,res,data){
+//Esta sección detecta en que browser y sistema operativo se abre
+//El correo de verificación de la cuenta.
+//Esto con el fin de redireccionar a la app en caso de móvil
+//Ó direccionar a la página en caso de la versión web
+
 	var ua = req.headers['user-agent'],
 	    $ = {};
-	
 	if (/mobile/i.test(ua)){
 		console.log("Caso MOBILE");
 	}
@@ -1888,14 +2018,17 @@ var browserAccountRedirect = function (req,res,data){
 		return;
 	}	
 };
-//Email Verifier//
+//Email Verifier*//
 var emailVerification = function (req,data,type){
-	console.log("Doc: "+data);
+	//Encriptamos el correo del usuario
 	var token = security.encrypt(data.email);
+	//Lo encodeamos en base 64 para poderlo utilizar en la url
 	var tokenB64 = security.base64(token);
+	//Tomamos el correo sin encriptar y lo encodeamos en base 64
 	var emailB64 = security.base64(data.email);
+	//Formamos una url decifrable únicamente por nuestro sistema para poder verificar la autenticidad
 	var url = 'http://'+hostname+':1414/api_1.0/Account/Verify/'+type+'/'+emailB64+'/'+tokenB64;
-				mail.send("Verifica tu cuenta", "Hola "+data.name+"!. <br>Estás a solo un paso de ser parte de DocLinea!  Verifica tu cuenta haciendo click en el siguiente botón:<br> <a href='"+url+"'> Verificar </a><br>Saludos! Tu equipo DocLinea.", data.email);
+				mail.send("Verifica tu cuenta", mail_template.email_verification(data,url), data.email);
 };
 /////////////////////////////////
 //End of Functions///////////////
@@ -1905,31 +2038,34 @@ var emailVerification = function (req,data,type){
 //Password Redirect//////////////
 /////////////////////////////////
 exports.passwordRedirect = function (req, res){
+	console.log("Password redirect function");
 	var ua = req.headers['user-agent'],
 	    $ = {};
 	
 	if (/mobile/i.test(ua)){
-	
+	console.log("Caso Mobile");
 	}
 	
 	if (/like Mac OS X/.test(ua)) {
+		console.log("Caso MACOSX");
 	    res.redirect('doclinea://password_redirect?token='+req.params.token+'&type='+req.params.type+'&request='+req.params.request+'&email='+req.params.email);
 	}
 	
 	if (/Android/.test(ua)){
-	
+		console.log("Caso Android");
 	}
 	
 	if (/webOS\//.test(ua)){
-		
+		console.log("Caso WEBOS");
 	}
 	
 	if (/(Intel|PPC) Mac OS X/.test(ua)){
+		console.log("Caso INTEL PPC MAC");
 		res.redirect('http://'+hostname+':3000/#/NewPassword/'+req.params.token+'/'+req.params.type+'/'+req.params.request+'/'+req.params.email);
 	}
 	
 	if (/Windows NT/.test(ua)){
-		
+		console.log("Caso Windows");
 	}
 };
 /////////////////////////////////
