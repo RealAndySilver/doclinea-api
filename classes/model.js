@@ -720,6 +720,19 @@ exports.deleteUser = function(req,res){
 		}
 	});
 };
+//Invite
+exports.userInvite = function(req,res){
+/*Log*/utils.log("User/Invite","Recibo:",JSON.stringify(req.body));
+	User.findOne({email:req.body.email}, function(err,user){
+		if(user){
+			mail.send(user.name+ " " + user.lastname + " quiere que pruebes DocLinea!", req.body.message,req.body.destination_email);
+			res.json({status:true, message:"Mensaje enviado con éxito."});
+		}
+		else{
+			res.json({status:false, message:"Error al enviar al mensaje. No hay autenticación."});
+		}
+	});
+}
 //////////////////////////////////////
 //End of User CRUD////////////////////
 //////////////////////////////////////
@@ -1638,6 +1651,8 @@ exports.deleteHospital = function(req,res){
 //////////////////////////////////
 //End of Appointment CRUD/////////
 //////////////////////////////////
+
+
 
 //////////////////////////////////
 //Verify//////////////////////////

@@ -88,7 +88,8 @@ app.post('/api_1.0/User/ChangePassword/:user_id', model.changePasswordUser);
 //User Recover Password
 app.get('/api_1.0/User/Recover/:user_email', model.requestRecoverUser);
 app.post('/api_1.0/User/NewPassword/:token', model.newPasswordUser);
-
+//Invite
+app.post('/api_1.0/User/Invite', model.userInvite);
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
