@@ -197,14 +197,17 @@ var DoctorSchema= new mongoose.Schema({
 var AppointmentSchema= new mongoose.Schema({
 	user_id : {type: String, required:false},
 	user_name: {type: String, required:false},
-	user_notes: {type: String, required:false},
+	patient_phone: {type: String, required:false},
+	patient_name: {type: String, required:false},
+	patient_is_user: {type: Boolean, required:false},
+	//user_notes: {type: String, required:false},
 	doctor_id : {type: String, required:true},
 	doctor_name: {type: String, required:false},
 	doctor_notes: {type: String, required:false},
 	date_created : {type: Date, required:true},
 	appointment_length : {type: Number, required:false},
 	type : {type: String, required:false},
-	status : {type: String, required:false}, //available, cancelled, confirmed, taken, external
+	status : {type: String, required:false}, //available, cancelled, taken, external
 	reason : {type: String, required:false},
 	date_start : {type: Date, required:true},
 	date_end : {type: Date, required:true},
@@ -1517,7 +1520,7 @@ exports.createAppointment = function(req,res){
 		date_created : new Date(),
 		appointment_length : 10,
 		type : req.body.type,
-		status : req.body.status, //available, cancelled, confirmed, taken, external
+		status : req.body.status, //available, external
 		date_start : req.body.date_start,
 		date_end : req.body.date_end,
 		location : req.body.location,
