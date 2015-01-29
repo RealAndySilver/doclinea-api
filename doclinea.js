@@ -184,9 +184,9 @@ app.post('/api_1.0/Appointment/Create/:doctor_id', model.createAppointment);
 //Appointment Get APIs
 app.get('/api_1.0/Appointment/Get/:appointment_id', model.getAppointmentByID);
 app.get('/api_1.0/Appointment/GetAll', model.getPracticeByID);
-app.get('/api_1.0/Appointment/GetAvailableForDoctor/:doctor_id', model.getPracticeByID);
+app.get('/api_1.0/Appointment/GetAvailableForDoctor/:doctor_id', model.getAppointmentsAvailableForDoctor);
 app.get('/api_1.0/Appointment/GetAllForDoctor/:doctor_id', model.getAllAppointmentsForDoctor);
-app.get('/api_1.0/Appointment/GetForUser/:user_id', model.getPracticeByID);
+app.get('/api_1.0/Appointment/GetForUser/:user_id', model.getAllAppointmentsForUser);
 //Appointment Update APIs
 app.post('/api_1.0/Appointment/Update/:appointment_id', model.updateAppointment);
 app.post('/api_1.0/Appointment/Cancel/:appointment_id', model.updatePractice);

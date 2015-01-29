@@ -1600,15 +1600,15 @@ exports.getAllAppointmentsForUser = function(req,res){
 exports.takeAppointment = function(req,res){
 var filtered_body = utils.remove_empty(req.body);
 	/*Log*/utils.log("Appointment/Take","Recibo:",JSON.stringify(req.body));
-	Appointment.findOneAndUpdate({_id:req.params.appointment_id},
-	   {$set:{status: "taken", user_id:filtered_body.user_id, user_name: filtered_body.user_name}}, 
+	Appointment.findOneAndUpdate({_id:req.params.appointment_id, status: "available"},
+	   {$set:filtered_body}, 
 	   	function(err,appointment){
 	   	if(!appointment){
-		   	res.json({status: false, error: "not found"});
+		   	res.json({status: false, error: "Cita no disponible."});
 	   	}
 	   	else{
-		   	/*Log*/utils.log("Appointment/Update","Envío:",JSON.stringify(appointment));
-		   	res.json({status:true, message:"Cita actualizado exitosamente."});
+		   	/*Log*/utils.log("Appointment/Take","Envío:",JSON.stringify(appointment));
+		   	res.json({status:true, message:"Cita actualizada exitosamente."});
 	   	}
 	});
 };
