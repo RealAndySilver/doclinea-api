@@ -78,6 +78,8 @@ app.post('/api_1.0/User/Create', model.createUser);
 app.get('/api_1.0/User/GetByEmail/:email', model.getUserByEmail);
 app.get('/api_1.0/User/GetByID/:id', model.getUserByID);
 app.get('/api_1.0/User/GetAll', model.getAllUsers);
+app.get('/api_1.0/User/GetFavorites/:user_id', model.getFavorites);
+//User Authenticate
 app.post('/api_1.0/User/Authenticate', model.authenticateUser);
 //User Update APIs
 app.post('/api_1.0/User/Update/:user_id', model.updateUser);
@@ -90,6 +92,10 @@ app.get('/api_1.0/User/Recover/:user_email', model.requestRecoverUser);
 app.post('/api_1.0/User/NewPassword/:token', model.newPasswordUser);
 //Invite
 app.post('/api_1.0/User/Invite', model.userInvite);
+//Fav Doctor
+app.post('/api_1.0/User/Fav/:user_id', model.favDoctor);
+//UnFav Doctor
+app.post('/api_1.0/User/UnFav/:user_id', model.unFavDoctor);
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////

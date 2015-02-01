@@ -32,9 +32,11 @@ var exclude = {/*password:0*/};
 var verifyEmailVar = false;
 
 //Producción
-var hostname = "192.241.187.135";
+var hostname = "192.241.187.135:1414";
+var webapp = "192.241.187.135:3000"
 //Dev
-//var hostname = "192.168.0.37";
+//var hostname = "192.168.0.37:1414";
+//var webapp = "192.241.187.135:3000"
 
 //////////////////////////////////
 //End of Global Vars//////////////
@@ -138,6 +140,7 @@ var UserSchema= new mongoose.Schema({
 	canceled_appointments : {type: Array, required:false},
 	devices : {type: [Device], required:false},
 	settings: {email_appointment_notifications:Boolean, email_marketing_notifications:Boolean, mobile_appointment_notifications:Boolean, mobile_marketing_notifications:Boolean},
+	favorites : {type: Array, required:false},
 }),
 	User= mongoose.model('User',UserSchema);
 //////////////////////////////////
@@ -736,6 +739,68 @@ exports.userInvite = function(req,res){
 		}
 	});
 }
+//Fav Doctor
+exports.favDoctor = function(req,res){
+	User.findOneAndUpdate({_id:req.params.user_id},{$addToSet:{favorites:doctor_id}}, function (err,user) {
+		if(user){
+			Doctor.find({_id:{$in:user.favorites}}, function(err,doctors){
+				if(doctors.length>0){
+					res.json({message:"No hay favoritos para este usuario", status:false});
+				}
+				else{
+					res.json({
+								response: doctors, 
+								message: "Doctor agregado a favoritos de manera exitosa.", 
+								status:true
+							});
+				}
+			});
+		}
+		else{
+			res.json({status:false, message:"Error al agregar doctor como favorito."});
+		}
+	});
+};
+//UnFav Doctor
+exports.unFavDoctor = function(req,res){
+	User.findOneAndUpdate({_id:user_id},{$pull:{favorites:doctor_id}}, function (err,user) {
+		if(!user){
+			res.json({message:"No se encontró el usuario.", status:false});
+		}
+		else{
+			Doctor.find({_id:{$in:user.favorites}}, function(err,doctors){
+				if(doctors.length>0){
+					res.json({message:"No hay favoritos para este usuario", status:false});
+				}
+				else{
+					res.json({
+								response: doctors, 
+								message: "Doctor removido de favoritos de manera exitosa.", 
+								status:true
+							});
+				}
+			});
+		}
+	});
+};
+//Get Favorites
+exports.getFavorites = function(req,res){
+	User.findOne({_id:req.params.user_id}, function(err,user){
+		if(!user){
+			res.json({message:"No se encontró el usuario.", status:false});
+		}
+		else{
+			Doctor.find({_id:{$in:user.favorites}}, function(err,doctors){
+				if(doctors.length>0){
+					res.json({message:"No hay favoritos para este usuario", status:false});
+				}
+				else{
+					res.json({response: doctors, status:true});
+				}
+			});
+		}	
+	});
+};
 //////////////////////////////////////
 //End of User CRUD////////////////////
 //////////////////////////////////////
@@ -1678,7 +1743,7 @@ exports.verifyAccount= function(req,res){
 				}
 				else{
 					if(result){
-						var url = 'http://'+hostname+':3000';
+						var url = 'http://'+webapp;
 						if(!checkIfConfirmed){
 							mail.send("!Bienvenido a DocLinea!", mail_template.doctor_new_account(doctor,url), doctor.email);
 						}
@@ -1707,7 +1772,7 @@ exports.verifyAccount= function(req,res){
 					}
 					else{
 						if(result){
-							var url = 'http://'+hostname+':3000';
+							var url = 'http://'+webapp;
 							if(!checkIfConfirmed){
 								mail.send("!Bienvenido a DocLinea!", mail_template.user_new_account(user,url), user.email);
 							}
@@ -2026,13 +2091,13 @@ var browserAccountRedirect = function (req,res,data){
 	
 	if (/(Intel|PPC) Mac OS X/.test(ua)){
 		console.log("Caso INTEL PPC MACOSX");
-		res.redirect('http://'+hostname+':3000/#/account_activation/'+data.type+'/'+data.email);
+		res.redirect('http://'+webapp+'/#/account_activation/'+data.type+'/'+data.email);
 		return;
 	}
 	
 	if (/Windows NT/.test(ua)){
 		console.log("Caso WINDOWS NT");
-		res.redirect('http://'+hostname+':3000/#/account_activation/'+data.type+'/'+data.email);
+		res.redirect('http://'+webapp+'/#/account_activation/'+data.type+'/'+data.email);
 		return;
 	}	
 };
@@ -2045,7 +2110,7 @@ var emailVerification = function (req,data,type){
 	//Tomamos el correo sin encriptar y lo encodeamos en base 64
 	var emailB64 = security.base64(data.email);
 	//Formamos una url decifrable únicamente por nuestro sistema para poder verificar la autenticidad
-	var url = 'http://'+hostname+':1414/api_1.0/Account/Verify/'+type+'/'+emailB64+'/'+tokenB64;
+	var url = 'http://'+hostname+'/api_1.0/Account/Verify/'+type+'/'+emailB64+'/'+tokenB64;
 				mail.send("Verifica tu cuenta", mail_template.email_verification(data,url), data.email);
 };
 /////////////////////////////////
@@ -2079,7 +2144,7 @@ exports.passwordRedirect = function (req, res){
 	
 	if (/(Intel|PPC) Mac OS X/.test(ua)){
 		console.log("Caso INTEL PPC MAC");
-		res.redirect('http://'+hostname+':3000/#/NewPassword/'+req.params.token+'/'+req.params.type+'/'+req.params.request+'/'+req.params.email);
+		res.redirect('http://'+webapp+'/#/NewPassword/'+req.params.token+'/'+req.params.type+'/'+req.params.request+'/'+req.params.email);
 	}
 	
 	if (/Windows NT/.test(ua)){
