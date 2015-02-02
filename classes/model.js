@@ -740,20 +740,23 @@ exports.userInvite = function(req,res){
 	});
 }
 //Fav Doctor
+
 exports.favDoctor = function(req,res){
-	User.findOneAndUpdate({_id:req.params.user_id},{$addToSet:{favorites:doctor_id}}, function (err,user) {
+	/*Log*/utils.log("User/Fav","Recibo:",JSON.stringify(req.body));
+	User.findOneAndUpdate({_id:req.params.user_id},{$addToSet:{favorites:req.body.doctor_id}}, function (err,user) {
 		if(user){
 			Doctor.find({_id:{$in:user.favorites}}, function(err,doctors){
 				if(doctors.length>0){
-					res.json({message:"No hay favoritos para este usuario", status:false});
-				}
-				else{
 					res.json({
 								response: doctors, 
 								message: "Doctor agregado a favoritos de manera exitosa.", 
 								status:true
 							});
 				}
+				else{
+					res.json({message:"No hay favoritos para este usuario", status:true, response:doctors});
+				}
+				
 			});
 		}
 		else{
@@ -763,21 +766,21 @@ exports.favDoctor = function(req,res){
 };
 //UnFav Doctor
 exports.unFavDoctor = function(req,res){
-	User.findOneAndUpdate({_id:user_id},{$pull:{favorites:doctor_id}}, function (err,user) {
+	User.findOneAndUpdate({_id:req.params.user_id},{$pull:{favorites:req.body.doctor_id}}, function (err,user) {
 		if(!user){
 			res.json({message:"No se encontró el usuario.", status:false});
 		}
 		else{
 			Doctor.find({_id:{$in:user.favorites}}, function(err,doctors){
 				if(doctors.length>0){
-					res.json({message:"No hay favoritos para este usuario", status:false});
-				}
-				else{
 					res.json({
 								response: doctors, 
 								message: "Doctor removido de favoritos de manera exitosa.", 
 								status:true
 							});
+				}
+				else{
+					res.json({message:"No hay favoritos para este usuario", status:true, response:doctors});
 				}
 			});
 		}
@@ -785,6 +788,7 @@ exports.unFavDoctor = function(req,res){
 };
 //Get Favorites
 exports.getFavorites = function(req,res){
+	/*Log*/utils.log("User/GetFavorites","Recibo:",JSON.stringify(req.body));
 	User.findOne({_id:req.params.user_id}, function(err,user){
 		if(!user){
 			res.json({message:"No se encontró el usuario.", status:false});
@@ -792,10 +796,10 @@ exports.getFavorites = function(req,res){
 		else{
 			Doctor.find({_id:{$in:user.favorites}}, function(err,doctors){
 				if(doctors.length>0){
-					res.json({message:"No hay favoritos para este usuario", status:false});
+					res.json({response: doctors, status:true});
 				}
 				else{
-					res.json({response: doctors, status:true});
+					res.json({message:"No hay favoritos para este usuario", status:true, response:doctors});
 				}
 			});
 		}	
@@ -1611,7 +1615,11 @@ exports.getAppointmentByID = function(req,res){
 };
 //Read Many
 exports.getAppointmentsAvailableForDoctor = function(req,res){
-	Appointment.find({doctor_id:req.params.doctor_id, status:"available"},function(err,appointment){
+	//Este filtro de fecha nos permite enviar únicamente citas a partir de hoy
+	//Las citas pasadas no se mostrarán.
+	var dateNow = Date.now();
+	////////////////////////
+	Appointment.find({doctor_id:req.params.doctor_id, status:"available",date_start:{$gt:dateNow}},function(err,appointment){
 		if(!appointment){
 			res.json({status: false, error: "not found"});
 		}
@@ -1652,7 +1660,11 @@ exports.getAllAppointmentsForDoctor = function(req,res){
 	});
 };
 exports.getAllAppointmentsForUser = function(req,res){
-	Appointment.find({user_id:req.params.user_id},function(err,appointment){
+	//Este filtro de fecha nos permite enviar únicamente citas a partir de hoy
+	//Las citas pasadas no se mostrarán.
+	var dateNow = Date.now();
+	////////////////////////
+	Appointment.find({user_id:req.params.user_id, status:"taken", date_start:{$gt:dateNow}},function(err,appointment){
 		if(!appointment){
 			res.json({status: false, error: "not found"});
 		}
@@ -1691,6 +1703,52 @@ var filtered_body = utils.remove_empty(req.body);
 		   	res.json({status:true, message:"Cita actualizado exitosamente."});
 	   	}
 	});
+};
+exports.cancelAppointment = function(req,res){
+var filtered_body = utils.remove_empty(req.body);
+	/*Log*/utils.log("Appointment/Cancel","Recibo:",JSON.stringify(req.body));
+	//Filtramos la entrada al servicio por medio del type, recibimos un user o un doctor
+	//de
+	if(req.params.type == "user"){
+		Appointment.findOneAndUpdate({_id:req.params.appointment_id, user_id:req.body.user_id, status: "taken"},
+		   {$set:{user_id : "",
+			user_name: "",
+			patient_phone: "",
+			patient_name: "",
+			patient_is_user: false,
+			status : "available", //available, cancelled, taken, external
+			reason : ""
+			}
+			}, 
+		   	function(err,appointment){
+		   	if(!appointment){
+			   	res.json({status: false, error: "Cita no disponible para cancelar."});
+		   	}
+		   	else{
+			   	/*Log*/utils.log("Appointment/Cancel","Envío:",JSON.stringify(appointment));
+			   	///////////////////////////
+			   	//Enviar correo electrónico de cancelación y push notifications si es necesario acá
+			   	//////////////////////////
+			   	res.json({status:true, message:"Cita cancelada exitosamente."});
+		   	}
+		});
+	}
+	else if(req.params.type == "doctor"){
+		Appointment.findOneAndUpdate({_id:req.params.appointment_id, doctor_id:req.body.doctor_id},
+		   {$set:{status : "cancelled"}}, 
+		   	function(err,appointment){
+		   	if(!appointment){
+			   	res.json({status: false, error: "Cita no disponible para cancelar."});
+		   	}
+		   	else{
+			   	/*Log*/utils.log("Appointment/Cancel","Envío:",JSON.stringify(appointment));
+			   	///////////////////////////
+			   	//Enviar correo electrónico de cancelación y push notifications si es necesario acá
+			   	//////////////////////////
+			   	res.json({status:true, message:"Cita cancelada exitosamente."});
+		   	}
+		});
+	}
 };
 exports.updateHospitalPic = function(req,res){
 /*Log*/utils.log("Hospital/UpdatePic","Recibo:",JSON.stringify(req.files));

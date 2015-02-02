@@ -43,11 +43,7 @@ app.get('/*', function(req, res, next){
   res.setHeader('Last-Modified', (new Date()).toUTCString());
   next(); 
 });
-app.post('/dazuku', function(req, res, next){ 
-  console.log("Header: "+JSON.stringify(req.headers) + "\nBody: "+JSON.stringify(req.body));
-  res.json({response:req.body, headers:req.headers});
-  //next(); 
-});
+
 //Middleware to encode password
 app.post('/api_1.0/User/Create', security.passwordEncrypt);
 app.post('/api_1.0/Doctor/Create', security.passwordEncrypt);
@@ -195,7 +191,7 @@ app.get('/api_1.0/Appointment/GetAllForDoctor/:doctor_id', model.getAllAppointme
 app.get('/api_1.0/Appointment/GetForUser/:user_id', model.getAllAppointmentsForUser);
 //Appointment Update APIs
 app.post('/api_1.0/Appointment/Update/:appointment_id', model.updateAppointment);
-app.post('/api_1.0/Appointment/Cancel/:appointment_id', model.updatePractice);
+app.post('/api_1.0/Appointment/Cancel/:appointment_id/:type', model.cancelAppointment);
 app.post('/api_1.0/Appointment/Available/:appointment_id', model.updatePractice);
 app.post('/api_1.0/Appointment/External/:appointment_id', model.updatePractice);
 app.post('/api_1.0/Appointment/Take/:appointment_id', model.takeAppointment);
