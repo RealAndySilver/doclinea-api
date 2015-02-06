@@ -1650,7 +1650,8 @@ exports.getAllAppointments = function(req,res){
 	});
 };
 exports.getAllAppointmentsForDoctor = function(req,res){
-	Appointment.find({doctor_id:req.params.doctor_id},function(err,appointments){
+	var dateNow = Date.now();
+	Appointment.find({doctor_id:req.params.doctor_id, date_start:{$gt:dateNow}},function(err,appointments){
 		if(!appointments){
 			res.json({status: false, error: "not found"});
 		}
