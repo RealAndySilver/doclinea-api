@@ -206,6 +206,7 @@ var AppointmentSchema= new mongoose.Schema({
 	//user_notes: {type: String, required:false},
 	doctor_id : {type: String, required:true},
 	doctor_name: {type: String, required:false},
+	doctor_image: {type: String, required:false},
 	doctor_notes: {type: String, required:false},
 	date_created : {type: Date, required:true},
 	appointment_length : {type: Number, required:false},
@@ -1585,6 +1586,7 @@ exports.createAppointment = function(req,res){
 	new Appointment({
 		doctor_id : req.params.doctor_id,
 		doctor_name: req.body.doctor_name,
+		doctor_image : req.body.doctor_image,
 		doctor_notes: req.body.doctor_notes,
 		date_created : new Date(),
 		appointment_length : 10,
