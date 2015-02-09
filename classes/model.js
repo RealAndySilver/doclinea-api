@@ -200,6 +200,7 @@ var DoctorSchema= new mongoose.Schema({
 var AppointmentSchema= new mongoose.Schema({
 	user_id : {type: String, required:false},
 	user_name: {type: String, required:false},
+	insurance: {type: Array, required: false},
 	patient_phone: {type: String, required:false},
 	patient_name: {type: String, required:false},
 	patient_is_user: {type: Boolean, required:false},
@@ -1718,6 +1719,7 @@ var filtered_body = utils.remove_empty(req.body);
 			user_name: "",
 			patient_phone: "",
 			patient_name: "",
+			insurance: {},
 			patient_is_user: false,
 			status : "available", //available, cancelled, taken, external
 			reason : ""
