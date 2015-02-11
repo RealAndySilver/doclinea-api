@@ -58,8 +58,7 @@ var Settings = new mongoose.Schema({email_appointment_notifications:Boolean, ema
 //HomePage Schema/////////////////
 //////////////////////////////////
 var HomePageSchema= new mongoose.Schema({
-	section0_register_text: {type: String},
-	section0_login_text: {type: String},
+	type : {type : String, required: true, unique: true},
 	section1_left_title: {type: String},
 	section1_left_paragraph1: {type: String},
 	section1_left_paragraph2: {type: String},
@@ -91,7 +90,6 @@ var HomePageSchema= new mongoose.Schema({
 	section6_google_link: {type: String},
 	section6_linkedin_link: {type: String},
 	section6_youtube_link: {type: String},
-	section7_footer_text: {type: String},
 }),
 	HomePage= mongoose.model('HomePage',HomePageSchema);
 //////////////////////////////////
@@ -338,6 +336,49 @@ var client = knox.createClient({
   , secret: 'aVk5U5oA3PPRx9FmY+EpV3+XMBhxfUuSSU/s3Dbp'
   , bucket: 'doclinea'
 });
+
+//////////////////////////////////
+//Home page texts//////////
+//////////////////////////////////
+//Update and Create
+exports.updateHomePage = function(req,res){
+	var filtered_body = utils.remove_empty(req.body);
+	HomePage.findOne({type:"Home"}, function(err, home){
+		if(!home){
+			filtered_body.type = "Home";
+			new HomePage(filtered_body).save(function(err,admin){
+				if(err){
+					res.json(err);
+				}
+				else{
+					res.json({status: true, response: home, message: "Home creado exitosamente"});
+				}
+			});
+		}
+		else{
+			HomePage.findOneAndUpdate({type:"Home"},
+			   {$set:filtered_body}, 
+			   	function(err,home){
+			   		/*Log*/utils.log("Home/Update","Envío:",JSON.stringify(home));
+				   	res.json({status:true, message:"Home actualizado exitosamente", response:home});
+			});
+		}
+	});
+};
+//Get
+exports.getHome = function(req,res){
+	HomePage.findOne({type:"Home"},function(err,home){
+		if(err){
+			res.json({status: false, error: "not found"});
+		}
+		else{
+			res.json({status: true, response: home});
+		}
+	});
+};
+//////////////////////////////////
+//Endo of Home page texts/////////
+//////////////////////////////////
 
 //////////////////////////////////
 //Admin CRUD starts here//////////
@@ -635,7 +676,7 @@ var filtered_body = utils.remove_empty(req.body);
 };
 //Password
 exports.requestRecoverUser = function(req,res){
-	/*Log*/utils.log("User/Recover","Recibo:",req.params.user_email);
+	/*utils.log("User/Recover","Recibo:",req.params.user_email);*/
 	User.findOne({email:req.params.user_email},function(err,user){
 		if(!user){
 			res.json({status: false, error: "not found"});
