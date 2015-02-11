@@ -346,12 +346,12 @@ exports.updateHomePage = function(req,res){
 	HomePage.findOne({type:"Home"}, function(err, home){
 		if(!home){
 			filtered_body.type = "Home";
-			new HomePage(filtered_body).save(function(err,admin){
+			new HomePage(filtered_body).save(function(err,object){
 				if(err){
 					res.json(err);
 				}
 				else{
-					res.json({status: true, response: home, message: "Home creado exitosamente"});
+					res.json({status: true, response: object, message: "Home creado exitosamente"});
 				}
 			});
 		}
