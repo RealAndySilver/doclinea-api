@@ -55,43 +55,14 @@ var Settings = new mongoose.Schema({email_appointment_notifications:Boolean, ema
 //////////////////////////////////
 
 //////////////////////////////////
-//HomePage Schema/////////////////
+//CMS Schema/////////////////
 //////////////////////////////////
-var HomePageSchema= new mongoose.Schema({
+var CMSSchema= new mongoose.Schema({
 	type : {type : String, required: true, unique: true},
-	section1_left_title: {type: String},
-	section1_left_paragraph1: {type: String},
-	section1_left_paragraph2: {type: String},
-	section1_left_paragraph3: {type: String},
-	section1_mobile_title: {type: String},
-	section1_appstore_link: {type: String},
-	section1_googleplay_link: {type: String},
-	section1_find_doctor_button: {type: String},
-	section2_left_title: {type: String},
-	section2_left_paragraph: {type: String},
-	section2_center_title: {type: String},
-	section2_center_paragraph: {type: String},
-	section2_right_title: {type: String},
-	section2_right_paragraph: {type: String},
-	section3_title: {type: String},
-	section4_left_title: {type: String},
-	section4_left_paragraph: {type: String},
-	section4_left_button_title: {type: String},
-	section4_right_title: {type: String},
-	section4_right_paragraph: {type: String},
-	section4_right_button_title: {type: String},
-	section5_title: {type: String},
-	section5_phone: {type: String},
-	section5_email: {type: String},
-	section5_contact_button: {type: String},
-	section6_follow_title: {type: String},
-	section6_facebook_link: {type: String},
-	section6_twitter_link: {type: String},
-	section6_google_link: {type: String},
-	section6_linkedin_link: {type: String},
-	section6_youtube_link: {type: String},
+	home_info : {type: Object},
+	notification_info : {type: Object}
 }),
-	HomePage= mongoose.model('HomePage',HomePageSchema);
+	CMS= mongoose.model('CMS',CMSSchema);
 //////////////////////////////////
 //End HomePage Schema ////////////
 //////////////////////////////////
@@ -338,15 +309,15 @@ var client = knox.createClient({
 });
 
 //////////////////////////////////
-//Home page texts//////////
+//CMS  texts//////////////////////
 //////////////////////////////////
-//Update and Create
-exports.updateHomePage = function(req,res){
+//Home Update and Create
+exports.updateCMSHomePage = function(req,res){
 	var filtered_body = utils.remove_empty(req.body);
-	HomePage.findOne({type:"Home"}, function(err, home){
+	CMS.findOne({type:"Home"}, function(err, home){
 		if(!home){
 			filtered_body.type = "Home";
-			new HomePage(filtered_body).save(function(err,object){
+			new CMS(filtered_body).save(function(err,object){
 				if(err){
 					res.json(err);
 				}
@@ -356,7 +327,7 @@ exports.updateHomePage = function(req,res){
 			});
 		}
 		else{
-			HomePage.findOneAndUpdate({type:"Home"},
+			CMS.findOneAndUpdate({type:"Home"},
 			   {$set:filtered_body}, 
 			   	function(err,home){
 			   		/*Log*/utils.log("Home/Update","Envío:",JSON.stringify(home));
@@ -365,14 +336,50 @@ exports.updateHomePage = function(req,res){
 		}
 	});
 };
-//Get
+//Notifications Update and Create
+exports.updateCMSNotifications = function(req,res){
+	var filtered_body = utils.remove_empty(req.body);
+	CMS.findOne({type:"Notifications"}, function(err, notif){
+		if(!notif){
+			filtered_body.type = "Notifications";
+			new CMS(filtered_body).save(function(err,object){
+				if(err){
+					res.json(err);
+				}
+				else{
+					res.json({status: true, response: object, message: "Notificaciones creadas exitosamente"});
+				}
+			});
+		}
+		else{
+			CMS.findOneAndUpdate({type:"Home"},
+			   {$set:filtered_body}, 
+			   	function(err,notif){
+			   		/*Log*/utils.log("Notifications/Update","Envío:",JSON.stringify(notif));
+				   	res.json({status:true, message:"Home actualizado exitosamente", response:notif});
+			});
+		}
+	});
+};
+//Get Home
 exports.getHome = function(req,res){
-	HomePage.findOne({type:"Home"},function(err,home){
+	CMS.findOne({type:"Home"},function(err,home){
 		if(err){
 			res.json({status: false, error: "not found"});
 		}
 		else{
 			res.json({status: true, response: home});
+		}
+	});
+};
+//Get Notifications
+exports.getNotifications = function(req,res){
+	CMS.findOne({type:"Notifications"},function(err,notif){
+		if(err){
+			res.json({status: false, error: "not found"});
+		}
+		else{
+			res.json({status: true, response: notif});
 		}
 	});
 };
