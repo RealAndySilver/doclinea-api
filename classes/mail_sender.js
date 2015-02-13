@@ -8,6 +8,7 @@ var transport = nodemailer.createTransport("SMTP", {
 });
 
 var message = function(subject,the_message,mail_address){
+	//Esta función retorna el objeto necesario para el envío del email
 		result={
 			    from: 'Doclinea <recover@doclinea.com>',
 			    to: '<'+mail_address+'>',
@@ -21,15 +22,13 @@ var message = function(subject,the_message,mail_address){
 	   return result;
 };
 exports.send= function(subject,the_message,mail_address){
+	//Esta función exporta la posibilidad de enviar un correo teniendo en cuenta 
+	//los parámetros de entrada
 	transport.sendMail(message(subject,the_message,mail_address), function(err){
 	    if(err){
-	        //res.json({status:0,message:'error',error:err})
 	        console.log(err.message);
 	        return;
 	    }
 	    console.log('Message sent successfully to '+mail_address);
-	    //res.json({status:1,message:'mail sent',error:0});
-	    // if you don't want to use this transport object anymore, uncomment following line
-	    //transport.close(); // close the connection pool
 	});
 };
