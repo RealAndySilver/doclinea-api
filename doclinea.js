@@ -6,7 +6,6 @@ var express = require('express')
   , path = require('path')
   , model = require('./classes/model')
   , mail = require('./classes/mail_sender')
-  , authentication = require('./classes/authentication')
   ,	security = require('./classes/security');
 var app = express();
 // all environments
