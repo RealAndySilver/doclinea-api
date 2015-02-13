@@ -206,7 +206,7 @@ app.post('/api_1.0/Appointment/Available/:appointment_id', model.updatePractice)
 app.post('/api_1.0/Appointment/External/:appointment_id', model.updatePractice);
 app.post('/api_1.0/Appointment/Take/:appointment_id', model.takeAppointment);
 //Appointment Delete APIs
-app.post('/api_1.0/Appointment/Delete/:appointment_id', model.removeAppointmentReason);
+app.post('/api_1.0/Appointment/Delete/:appointment_id', model.removeAppointment);
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
