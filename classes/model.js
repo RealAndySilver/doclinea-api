@@ -1762,7 +1762,7 @@ exports.getAppointmentsAvailableForDoctor = function(req,res){
 
 	//Este filtro de fecha nos permite enviar únicamente citas a partir de hoy
 	//Las citas pasadas no se mostrarán.
-	var dateNow = Date.now();
+	var dateNow = Date.now(-1);
 	////////////////////////
 	Appointment.find({doctor_id:req.params.doctor_id, status:"available",date_start:{$gt:dateNow}},function(err,appointment){
 		if(!appointment){
@@ -1800,7 +1800,7 @@ exports.getAllAppointmentsForDoctor = function(req,res){
 	//Este servicio obtiene todas las citas asignadas a un doctor
 	//Cuenta con un filtro de fecha y por lo tanto no mostrará 
 	//ninguna cita con fecha anterior a hoy	
-	var dateNow = Date.now();
+	var dateNow = Date.now(-1);
 	Appointment.find({doctor_id:req.params.doctor_id, date_start:{$gt:dateNow}},function(err,appointments){
 		if(!appointments){
 			res.json({status: false, error: "not found"});
@@ -1815,7 +1815,7 @@ exports.getAllAppointmentsForUser = function(req,res){
 		
 	//Este filtro de fecha nos permite enviar únicamente citas a partir de hoy
 	//Las citas pasadas no se mostrarán.
-	var dateNow = Date.now();
+	var dateNow = Date.now(-1);
 	////////////////////////
 	Appointment.find({user_id:req.params.user_id, status:"taken", date_start:{$gt:dateNow}},function(err,appointment){
 		if(!appointment){
@@ -2340,7 +2340,7 @@ var emailVerification = function (req,data,type){
 /////////////////////////////////
 
 /////////////////////////////////
-//Password Redirect//////////////
+//Password Redirect*/////////////
 /////////////////////////////////
 exports.passwordRedirect = function (req, res){
 	//Este servicio redirige a la aplicación móvil ó a la versión web de doclinea
