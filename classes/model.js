@@ -1800,8 +1800,11 @@ exports.getAllAppointmentsForDoctor = function(req,res){
 	//Este servicio obtiene todas las citas asignadas a un doctor
 	//Cuenta con un filtro de fecha y por lo tanto no mostrará 
 	//ninguna cita con fecha anterior a hoy	
+	//Se entregan ordenados por fecha
 	var dateNow = Date.now(-1);
-	Appointment.find({doctor_id:req.params.doctor_id, date_start:{$gt:dateNow}},function(err,appointments){
+	Appointment.find({doctor_id:req.params.doctor_id, date_start:{$gt:dateNow}})
+	.sort("date_start")
+	.execFind(function(err,appointments){
 		if(!appointments){
 			res.json({status: false, error: "not found"});
 		}
@@ -1815,9 +1818,12 @@ exports.getAllAppointmentsForUser = function(req,res){
 		
 	//Este filtro de fecha nos permite enviar únicamente citas a partir de hoy
 	//Las citas pasadas no se mostrarán.
+	//Se entregan ordenados por fecha
 	var dateNow = Date.now(-1);
 	////////////////////////
-	Appointment.find({user_id:req.params.user_id, status:"taken", date_start:{$gt:dateNow}},function(err,appointment){
+	Appointment.find({user_id:req.params.user_id, status:"taken", date_start:{$gt:dateNow}})
+	.sort("date_start")
+	.execFind(function(err,appointment){
 		if(!appointment){
 			res.json({status: false, error: "not found"});
 		}
