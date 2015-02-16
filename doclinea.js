@@ -1,7 +1,4 @@
 var express = require('express')
-  , routes = require('./routes')
-  , user = require('./routes/user')
-  , admin = require('./routes/admin')
   , http = require('http')
   , path = require('path')
   , model = require('./classes/model')
