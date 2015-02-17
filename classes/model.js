@@ -1834,6 +1834,10 @@ exports.getAllAppointmentsForUser = function(req,res){
 };
 //Update*
 exports.takeAppointment = function(req,res){
+	//Revisamos la información que llega y la parseamos en un formato json conocido
+	if(req.body.insurance){
+		req.body.insurance = utils.isJson(req.body.insurance) ? JSON.parse(req.body.insurance): req.body.insurance ;
+	}
 	//Este servicio permite a un usuario tomar una cita con estado available
 	var filtered_body = utils.remove_empty(req.body);
 	/*Log*/utils.log("Appointment/Take","Recibo:",JSON.stringify(req.body));
