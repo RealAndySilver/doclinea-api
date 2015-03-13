@@ -32,11 +32,11 @@ var exclude = {/*password:0*/};
 var verifyEmailVar = false;
 
 //Producción
-var hostname = "192.241.187.135:1414";
-var webapp = "192.241.187.135:3000"
-//Dev
-//var hostname = "192.168.0.37:1414";
+//var hostname = "192.241.187.135:1414";
 //var webapp = "192.241.187.135:3000"
+//Dev
+var hostname = "192.168.0.41:1414";
+var webapp = "192.241.187.135:3000"
 
 //////////////////////////////////
 //End of Global Vars//////////////
@@ -1192,6 +1192,7 @@ exports.updateProfilePic = function(req,res){
 		}
 	});
 };
+
 exports.authenticateDoctor = function(req,res){
 	//Este servicio autentica al doctor
 	/*Log*/utils.log("Doctor/Authenticate","Recibo:",JSON.stringify(req.body));
