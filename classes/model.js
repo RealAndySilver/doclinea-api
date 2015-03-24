@@ -2396,6 +2396,7 @@ exports.passwordRedirect = function (req, res){
 	
 	if (/Windows NT/.test(ua)){
 		console.log("Caso Windows");
+		res.redirect('http://'+webapp+'/#/NewPassword/'+req.params.token+'/'+req.params.type+'/'+req.params.request+'/'+req.params.email);
 	}
 };
 /////////////////////////////////
