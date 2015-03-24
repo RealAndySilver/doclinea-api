@@ -36,7 +36,7 @@ var verifyEmailVar = false;
 //var webapp = "192.241.187.135:3000"
 //Dev
 var hostname = "192.168.0.41:1414";
-var webapp = "192.241.187.135:3000"
+var webapp = "localhost:3000"
 
 //////////////////////////////////
 //End of Global Vars//////////////
@@ -803,11 +803,23 @@ exports.userInvite = function(req,res){
 	User.findOne({email:req.body.email}, function(err,user){
 		if(user){
 			//Enviamos el correo
+			console.log("1");
 			mail.send(user.name+ " " + user.lastname + " quiere que pruebes DocLinea!", req.body.message,req.body.destination_email);
 			res.json({status:true, message:"Mensaje enviado con éxito."});
 		}
 		else{
-			res.json({status:false, message:"Error al enviar al mensaje. No hay autenticación."});
+			Doctor.findOne({email:req.body.email}, function(err,doctor){
+				if(doctor){
+					//Enviamos el correo
+					console.log("1");
+					mail.send(doctor.name+ " " + doctor.lastname + " quiere que pruebes DocLinea!", req.body.message,req.body.destination_email);
+					res.json({status:true, message:"Mensaje enviado con éxito."});
+				}
+				else{
+					console.log("2");
+					res.json({status:false, message:"Error al enviar al mensaje. No hay autenticación."});
+				}
+			});
 		}
 	});
 }
