@@ -2207,6 +2207,12 @@ exports.sendPush = function (req,res){
 /////////////////////////////////
 //Image Uploader*//
 var uploadImage = function(file,object,type,owner){
+	var amazonUrl = '';
+	var findSpace = ' ';
+	var regSpace = new RegExp(findSpace, 'g');
+	var findSpecial = '[\\+*?\\[\\^\\]$(){}=!<>|:]';
+	var regSpecial = new RegExp(findSpecial, 'g');
+	
 	//Verificamos que llegue archivo adjunto
 	if(!file){
 		object.profile_pic = {name:"", image_url: ""};
@@ -2239,8 +2245,17 @@ var uploadImage = function(file,object,type,owner){
 				//Si no hay error en el proceso de guardado local
 				//Procedemos a subir el archivo al bucket con una ruta definida coherentemente
 				//Esta ruta se genera con los parámetros de entrada de la función
-				console.log("Objeto: "+object.email);
-				var req = client.put(owner+'/'+object.email+'/'+type+"/"+file.name, {
+								
+				amazonUrl = owner+'/'+
+							object.email+'/'+
+							type+"/"+
+							file.name;
+				
+				amazonUrl = amazonUrl.
+								replace(regSpace, '').
+								replace(regSpecial, '');
+								
+				var req = client.put(amazonUrl, {
 					      'Content-Length': stat.size,
 					      'Content-Type': file.type,
 					      'x-amz-acl': 'public-read'
